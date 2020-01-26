@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest

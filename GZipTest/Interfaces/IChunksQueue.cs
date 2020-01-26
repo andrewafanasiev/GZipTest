@@ -1,4 +1,6 @@
-﻿namespace GZipTest.Interfaces
+﻿using GZipTest.Dtos;
+
+namespace GZipTest.Interfaces
 {
     public interface IChunksQueue
     {

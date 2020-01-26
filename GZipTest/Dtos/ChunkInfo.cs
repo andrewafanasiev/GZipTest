@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GZipTest
+﻿namespace GZipTest.Dtos
 {
     public class ChunkInfo
     {
