@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using CommandLine;
 using GZipTest.Dtos;
 using GZipTest.Interfaces;
@@ -12,63 +9,28 @@ namespace GZipTest
     {
         static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<Compress, Decompress>(args).MapResult(
-                (Compress options) =>
+            IArgsValidator argsValidator = new ArgsValidator();
+
+            if (argsValidator.IsArgsValid(args, out string errorMessage))
+            {
+                string actionType = args[0], inFile = args[1], outFile = args[2];
+
+                IFileReader fileReader = new FileReader(inFile);
+                IFileWriterTask fileWriterTask = new FileWriterTask(outFile);
+                ICompressorFactory compressorFactory = new CompressorFactory();
+                IChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, compressorFactory.Create(actionType), fileReader, fileWriterTask);
+
+                //todo: add chunk info to queue
+
+                if (chunksQueue.IsActive() && fileWriterTask.IsActive())
                 {
-                    Console.WriteLine("compression start");
-
-                    //todo: validate args
-
-                    try
-                    {
-                        IFileReader fileReader = new FileReader(options.InFile);
-                        IFileWriterTask fileWriterTask = new FileWriterTask(options.OutFile);
-                        IGZipCompressor compressor = new GZipCompress();
-                        IChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, compressor, fileReader, fileWriterTask);
-
-                        //todo: add chunk info to queue
-
-                        if (chunksQueue.IsActive() && fileWriterTask.IsActive())
-                        {
-                            Console.WriteLine("compression success");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        return 1;
-                    }
-
-                    return 0;
-                },
-                (Decompress options) =>
-                {
-                    Console.WriteLine("decompression start");
-
-                    try
-                    {
-                        //todo: validate args
-
-                        IFileReader fileReader = new FileReader(options.InFile);
-                        IFileWriterTask fileWriterTask = new FileWriterTask(options.OutFile);
-                        IGZipCompressor compressor = new GZipDecompress();
-                        IChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, compressor, fileReader, fileWriterTask);
-
-                        //todo: add chunk info to queue
-
-                        if (chunksQueue.IsActive() && fileWriterTask.IsActive())
-                        {
-                            Console.WriteLine("decompression success");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        return 1;
-                    }
-
-                    return 0;
-                },
-                errs => 1
-            );
+                    Console.WriteLine("operation success");
+                }
+            }
+            else
+            {
+                Console.WriteLine(errorMessage);
+            }
 
             #if DEBUG
             Console.ReadLine();
