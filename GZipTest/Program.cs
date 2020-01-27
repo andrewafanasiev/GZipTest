@@ -1,6 +1,5 @@
 ﻿using System;
 using CommandLine;
-using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -11,25 +10,23 @@ namespace GZipTest
         {
             IArgsValidator argsValidator = new ArgsValidator();
 
-            if (argsValidator.IsArgsValid(args, out string errorMessage))
+            try
             {
-                string actionType = args[0], inFile = args[1], outFile = args[2];
-
-                IFileReader fileReader = new FileReader(inFile);
-                IFileWriterTask fileWriterTask = new FileWriterTask(outFile);
-                ICompressorFactory compressorFactory = new CompressorFactory();
-                IChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, compressorFactory.Create(actionType), fileReader, fileWriterTask);
-
-                //todo: add chunk info to queue
-
-                if (chunksQueue.IsActive() && fileWriterTask.IsActive())
+                if (argsValidator.IsArgsValid(args, out string errorMessage))
                 {
-                    Console.WriteLine("operation success");
+                    string actionType = args[0], inFile = args[1], outFile = args[2];
+                    var gzipManager = new GZipManager(inFile, outFile);
+
+                    gzipManager.Execute(actionType, Environment.ProcessorCount);
+                }
+                else
+                {
+                    Console.WriteLine(errorMessage);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine(errorMessage);
+                //todo: handle exception
             }
 
             #if DEBUG

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -15,10 +16,10 @@ namespace GZipTest
         private readonly Queue<ChunkInfo> _chunkInfos = new Queue<ChunkInfo>();
         private readonly object _lockObj = new object();
 
-        public ChunksQueue(int workersCount, IGZipCompressor compressor, IFileReader fileReader, IFileWriterTask fileWriterTask)
+        public ChunksQueue(string inFile, int workersCount, IGZipCompressor compressor, IFileWriterTask fileWriterTask)
         {
             _compressor = compressor;
-            _fileReader = fileReader;
+            _fileReader = new FileReader(inFile);
             _fileWriterTask = fileWriterTask;
 
             for (int i = 0; i < workersCount; ++i)
@@ -49,26 +50,33 @@ namespace GZipTest
 
         void Consume()
         {
-            while (true)
+            try
             {
-                ChunkInfo chunkInfo;
-                bool lockTaken = false;
-
-                try
+                while (true)
                 {
-                    Monitor.Enter(_lockObj, ref lockTaken);
+                    ChunkInfo chunkInfo;
+                    bool lockTaken = false;
 
-                    while (!_chunkInfos.Any()) Monitor.Wait(_lockObj);
-                    chunkInfo = _chunkInfos.Dequeue();
+                    try
+                    {
+                        Monitor.Enter(_lockObj, ref lockTaken);
+
+                        while (!_chunkInfos.Any()) Monitor.Wait(_lockObj);
+                        chunkInfo = _chunkInfos.Dequeue();
+                    }
+                    finally
+                    {
+                        if (lockTaken) Monitor.Exit(_lockObj);
+                    }
+
+                    if (chunkInfo == null) return;
+
+                    _fileWriterTask.AddChunk(chunkInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkInfo)));
                 }
-                finally
-                {
-                    if(lockTaken) Monitor.Exit(_lockObj);
-                }
-
-                if (chunkInfo == null) return;
-
-                _fileWriterTask.AddChunk(chunkInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkInfo)));
+            }
+            catch (Exception ex)
+            {
+                //todo: handle exception
             }
         }
 

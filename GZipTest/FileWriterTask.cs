@@ -41,31 +41,38 @@ namespace GZipTest
 
         void Consume()
         {
-            bool lockTaken = false;
-            int id = 0;
-
-            while (true)
+            try
             {
-                byte[] chunk;
+                int id = 0;
 
-                try
+                while (true)
                 {
-                    Monitor.Enter(_lockObj, ref lockTaken);
+                    byte[] chunk;
+                    bool lockTaken = false;
 
-                    while (!_chunks.TryGetValue(id, out chunk))
+                    try
                     {
-                        if(_chunks.ContainsKey(DummyId)) return;
+                        Monitor.Enter(_lockObj, ref lockTaken);
 
-                        Monitor.Wait(_lockObj);
+                        while (!_chunks.TryGetValue(id, out chunk))
+                        {
+                            if (_chunks.ContainsKey(DummyId)) return;
+
+                            Monitor.Wait(_lockObj);
+                        }
                     }
-                }
-                finally
-                {
-                    if(lockTaken) Monitor.Exit(_lockObj);
-                }
+                    finally
+                    {
+                        if (lockTaken) Monitor.Exit(_lockObj);
+                    }
 
-                WriteChunkToFile(chunk);
-                id++;
+                    WriteChunkToFile(chunk);
+                    id++;
+                }
+            }
+            catch (Exception ex)
+            {
+                //todo: handle exception
             }
         }
 
