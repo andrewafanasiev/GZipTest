@@ -2,6 +2,6 @@
 {
     public interface IGZipManager
     {
-        void Execute(string actionType, int workersCount);
+        void Execute(string actionType, int workersCount, int chunkSize);
     }
 }

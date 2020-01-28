@@ -4,7 +4,7 @@ namespace GZipTest.Interfaces
 {
     public interface IChunksQueue
     {
-        void EnqueueChunk(ChunkInfo chunkInfo);
+        void EnqueueChunk(Chunk chunk);
         bool IsActive();
     }
 }

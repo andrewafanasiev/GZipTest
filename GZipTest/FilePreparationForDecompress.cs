@@ -7,7 +7,7 @@ namespace GZipTest
 {
     public class FilePreparationForDecompress : IFilePreparation
     {
-        public List<ChunkInfo> GetChunkInfos(string inFile)
+        public ChunksInfo GetChunks(string inFile, int chunkSize)
         {
             throw new NotImplementedException();
         }

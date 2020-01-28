@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -10,19 +11,23 @@ namespace GZipTest
     public class FileWriterTask : IFileWriterTask, IDisposable
     {
         private readonly Thread _thread;
-        private readonly Dictionary<int, byte[]> _chunks = new Dictionary<int, byte[]>();
+        private volatile Exception _exception;
+        private readonly Dictionary<int, Chunk> _chunks = new Dictionary<int, Chunk>();
         private readonly object _lockObj = new object();
         private readonly string _fileName;
         private const int DummyId = -1;
+        private readonly int _maxChunkId;
 
-        public FileWriterTask(string fileName)
+        public FileWriterTask(string fileName, int maxChunkId)
         {
             _fileName = fileName;
+            _maxChunkId = maxChunkId;
+            _exception = null;
             _thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker" };
             _thread.Start();
         }
 
-        public void AddChunk(int id, byte[] bytes)
+        public void AddChunk(int id, Chunk chunk)
         {
             bool lockTaken = false;
 
@@ -30,7 +35,7 @@ namespace GZipTest
             {
                 Monitor.Enter(_lockObj, ref lockTaken);
 
-                _chunks.Add(id, bytes);
+                _chunks.Add(id, chunk);
                 Monitor.Pulse(_lockObj);
             }
             finally
@@ -47,7 +52,7 @@ namespace GZipTest
 
                 while (true)
                 {
-                    byte[] chunk;
+                    Chunk chunk;
                     bool lockTaken = false;
 
                     try
@@ -66,13 +71,14 @@ namespace GZipTest
                         if (lockTaken) Monitor.Exit(_lockObj);
                     }
 
-                    WriteChunkToFile(chunk);
+                    WriteChunkToFile(chunk.Content);
+                    chunk.IsWriteToFile = true;
                     id++;
                 }
             }
             catch (Exception ex)
             {
-                //todo: handle exception
+                _exception = ex;
             }
         }
 
@@ -87,7 +93,36 @@ namespace GZipTest
 
         public bool IsActive()
         {
-            return !_chunks.Any() && (_thread.ThreadState & ThreadState.WaitSleepJoin) == 0;
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.Enter(_lockObj, ref lockTaken);
+
+                if (_chunks.ContainsKey(_maxChunkId) && _chunks[_maxChunkId].IsWriteToFile)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            finally
+            {
+                if (lockTaken) Monitor.Exit(_lockObj);
+            }
+        }
+
+        public bool IsErrorExists(out Exception exception)
+        {
+            exception = null;
+
+            if (_exception != null)
+            {
+                exception = _exception;
+                return true;
+            }
+
+            return false;
         }
 
         public void Dispose()

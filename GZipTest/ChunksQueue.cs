@@ -9,18 +9,22 @@ namespace GZipTest
 {
     public class ChunksQueue : IChunksQueue, IDisposable
     {
-        private readonly List<Thread> _threads = new List<Thread>();
+        private readonly List<Thread> _threads;
+        private readonly List<Exception> _exceptions; //todo: volatile without lock?
         private readonly IGZipCompressor _compressor;
         private readonly IFileWriterTask _fileWriterTask;
         private readonly IFileReader _fileReader;
-        private readonly Queue<ChunkInfo> _chunkInfos = new Queue<ChunkInfo>();
-        private readonly object _lockObj = new object();
+        private readonly Queue<Chunk> _chunks = new Queue<Chunk>();
+        private readonly object _lockQueueObj = new object();
+        private readonly object _lockExObj = new object();
 
         public ChunksQueue(string inFile, int workersCount, IGZipCompressor compressor, IFileWriterTask fileWriterTask)
         {
             _compressor = compressor;
             _fileReader = new FileReader(inFile);
             _fileWriterTask = fileWriterTask;
+            _exceptions = new List<Exception>();
+            _threads = new List<Thread>();
 
             for (int i = 0; i < workersCount; ++i)
             {
@@ -31,20 +35,20 @@ namespace GZipTest
             }
         }
 
-        public void EnqueueChunk(ChunkInfo chunkInfo)
+        public void EnqueueChunk(Chunk chunk)
         {
             bool lockTaken = false;
 
             try
             {
-                Monitor.Enter(_lockObj, ref lockTaken);
+                Monitor.Enter(_lockQueueObj, ref lockTaken);
 
-                _chunkInfos.Enqueue(chunkInfo);
-                Monitor.PulseAll(_lockObj);
+                _chunks.Enqueue(chunk);
+                Monitor.PulseAll(_lockQueueObj);
             }
             finally
             {
-                if(lockTaken) Monitor.Exit(_lockObj);
+                if(lockTaken) Monitor.Exit(_lockQueueObj);
             }
         }
 
@@ -54,35 +58,86 @@ namespace GZipTest
             {
                 while (true)
                 {
-                    ChunkInfo chunkInfo;
-                    bool lockTaken = false;
+                    Chunk chunk;
+                    bool lockQueueTaken = false;
 
                     try
                     {
-                        Monitor.Enter(_lockObj, ref lockTaken);
+                        Monitor.Enter(_lockQueueObj, ref lockQueueTaken);
 
-                        while (!_chunkInfos.Any()) Monitor.Wait(_lockObj);
-                        chunkInfo = _chunkInfos.Dequeue();
+                        while (!_chunks.Any()) Monitor.Wait(_lockQueueObj);
+                        chunk = _chunks.Dequeue();
                     }
                     finally
                     {
-                        if (lockTaken) Monitor.Exit(_lockObj);
+                        if (lockQueueTaken) Monitor.Exit(_lockQueueObj);
                     }
 
-                    if (chunkInfo == null) return;
+                    if (chunk == null) return;
 
-                    _fileWriterTask.AddChunk(chunkInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkInfo)));
+                    chunk.SetContentForRecording(_compressor.Execute(_fileReader.GetChunkBytes(chunk)));
+                    _fileWriterTask.AddChunk(chunk.Id, chunk);
                 }
             }
             catch (Exception ex)
             {
-                //todo: handle exception
+                bool lockExTaken = false;
+
+                try
+                {
+                    Monitor.Enter(_lockExObj, ref lockExTaken);
+
+                    //todo: volatile without lock?
+                    _exceptions.Add(ex);
+                }
+                finally
+                {
+                    if (lockExTaken) Monitor.Exit(_lockExObj);
+                }
             }
         }
 
         public bool IsActive()
         {
-            return _chunkInfos.Any() || _threads.All(thread => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0);
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.Enter(_lockQueueObj, ref lockTaken);
+
+                return _chunks.Any() || !_threads.All(thread => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0);
+            }
+            finally
+            {
+                if (lockTaken) Monitor.Exit(_lockQueueObj);
+            }
+        }
+
+        public bool IsErrorExists(out List<Exception> exceptions)
+        {
+            exceptions = null;
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.Enter(_lockExObj, ref lockTaken);
+
+                //todo: volatile without lock?
+                if (_exceptions.Any())
+                {
+                    exceptions = _exceptions;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                
+            }
+            finally
+            {
+                if (lockTaken) Monitor.Exit(_lockExObj);
+            }
         }
 
         public void Dispose()

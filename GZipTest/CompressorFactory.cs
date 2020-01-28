@@ -14,7 +14,7 @@ namespace GZipTest
                 case Constants.Decompress:
                     return new GZipDecompress();
                 default:
-                    throw new InvalidEnumArgumentException();
+                    throw new InvalidEnumArgumentException($"Could not find action with name: {actionType}");
             }
         }
     }

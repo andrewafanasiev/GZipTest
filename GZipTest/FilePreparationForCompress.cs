@@ -7,26 +7,26 @@ namespace GZipTest
 {
     public class FilePreparationForCompress : IFilePreparation
     {
-        public List<ChunkInfo> GetChunkInfos(string inFile)
+        public ChunksInfo GetChunks(string inFile, int chunkSize)
         {
-            var chunkInfos = new List<ChunkInfo>();
+            var chunkInfos = new List<Chunk>();
             long fileLength = new FileInfo(inFile).Length;
             long availableBytes = fileLength;
-            int blockSize = 4096 * 1024;
             int offset = 0;
             int id = 0;
 
             while (availableBytes > 0)
             {
-                int bytesCount = availableBytes < blockSize ? (int) availableBytes : blockSize;
+                int bytesCount = availableBytes < chunkSize ? (int) availableBytes : chunkSize;
 
-                chunkInfos.Add(new ChunkInfo(id, offset, bytesCount));
+                chunkInfos.Add(new Chunk(id, offset, bytesCount));
 
-                availableBytes -= blockSize;
-                offset += blockSize;
+                availableBytes -= chunkSize;
+                offset += chunkSize;
+                id++;
             }
 
-            return chunkInfos;
+            return new ChunksInfo(id, chunkInfos);
         }
     }
 }

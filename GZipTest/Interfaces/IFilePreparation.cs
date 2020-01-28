@@ -5,6 +5,6 @@ namespace GZipTest.Interfaces
 {
     public interface IFilePreparation
     {
-        List<ChunkInfo> GetChunkInfos(string inFile);
+        ChunksInfo GetChunks(string inFile, int chunkSize);
     }
 }

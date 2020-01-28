@@ -7,6 +7,6 @@ namespace GZipTest.Interfaces
 {
     public interface IFileReader
     {
-        byte[] GetChunkBytes(ChunkInfo chunkInfo);
+        byte[] GetChunkBytes(Chunk chunk);
     }
 }
