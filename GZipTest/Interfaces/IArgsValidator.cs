@@ -6,5 +6,6 @@
         bool IsArgsCountValid(string[] args);
         bool IsActionTypeValid(string actionType);
         bool IsFilePathValid(string filePath);
+        bool IsFileExists(string filePath);
     }
 }

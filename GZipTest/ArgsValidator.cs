@@ -36,6 +36,18 @@ namespace GZipTest
                 return false;
             }
 
+            if (!IsFileExists(args[1]))
+            {
+                errorMessage = $"Input file with path: {args[1]} does not exists";
+                return false;
+            }
+
+            if (IsFileExists(args[2]))
+            {
+                errorMessage = $"Output file with path: {args[2]} is already exists. Choose another name, path or remove file";
+                return false;
+            }
+
             return true;
         }
 
@@ -56,9 +68,13 @@ namespace GZipTest
         public bool IsFilePathValid(string filePath)
         {
             if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
-            if (!File.Exists(filePath)) return false;
 
             return true;
+        }
+
+        public bool IsFileExists(string filePath)
+        {
+            return File.Exists(filePath);
         }
     }
 }
