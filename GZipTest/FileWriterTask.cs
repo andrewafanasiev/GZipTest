@@ -12,26 +12,28 @@ namespace GZipTest
     {
         private readonly Thread _thread;
         private volatile Exception _exception;
-        private readonly Dictionary<int, Chunk> _chunks = new Dictionary<int, Chunk>();
-        private readonly object _lockObj = new object();
+        private readonly Dictionary<int, ChunkWriteInfo> _chunks = new Dictionary<int, ChunkWriteInfo>();
+        private readonly IChunkWriter _chunkWriter;
+        private readonly object _lockChunksObj = new object();
         private readonly string _fileName;
         private const int DummyId = -1;
-        private readonly int _maxChunkId;
+        private readonly int _chunksCount;
 
-        public FileWriterTask(string fileName, int maxChunkId)
+        public FileWriterTask(string fileName, int chunksCount)
         {
             _fileName = fileName;
-            _maxChunkId = maxChunkId;
+            _chunksCount = chunksCount;
+            _chunkWriter = new ChunkWriter();
             _thread = new Thread(Consume) {IsBackground = true, Name = "Background worker (file writer)" };
             _thread.Start();
         }
 
-        public void AddChunk(int id, Chunk chunk)
+        public void AddChunk(int id, ChunkWriteInfo chunk)
         {
-            lock (_lockObj)
+            lock (_lockChunksObj)
             {
                 _chunks.Add(id, chunk);
-                Monitor.Pulse(_lockObj);
+                Monitor.Pulse(_lockChunksObj);
             }
         }
 
@@ -43,20 +45,21 @@ namespace GZipTest
 
                 while (true)
                 {
-                    Chunk chunk;
+                    ChunkWriteInfo chunk;
 
-                    lock (_lockObj)
+                    lock (_lockChunksObj)
                     {
                         while (!_chunks.TryGetValue(id, out chunk))
                         {
-                            if (_chunks.ContainsKey(DummyId)) return;
+                            if (_chunks.ContainsKey(DummyId) || id >= _chunksCount - 1) return;
 
-                            Monitor.Wait(_lockObj);
+                            Monitor.Wait(_lockChunksObj);
                         }
+
+                        _chunks.Remove(id);
                     }
 
-                    WriteChunkToFile(chunk.Content);
-                    chunk.IsWriteToFile = true;
+                    _chunkWriter.WriteToFile(_fileName, chunk.Content);
                     id++;
                 }
             }
@@ -66,29 +69,15 @@ namespace GZipTest
             }
         }
 
-        void WriteChunkToFile(byte[] bytes)
-        {
-            using (var writer = new BinaryWriter(File.Open(_fileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
-            {
-                writer.BaseStream.Seek(0, SeekOrigin.End);
-                writer.Write(bytes);
-            }
-        }
-
         public bool IsActive()
         {
-            lock (_lockObj)
+            lock (_lockChunksObj)
             {
-                if (_chunks.ContainsKey(_maxChunkId) && _chunks[_maxChunkId].IsWriteToFile)
-                {
-                    return false;
-                }
-
-                return true;
+                return _chunks.Any() && (_thread.ThreadState & (ThreadState.Stopped | ThreadState.Unstarted)) == 0;
             }
         }
 
-        public bool IsErrorExists(out Exception exception)
+        public bool IsErrorExist(out Exception exception)
         {
             exception = null;
 

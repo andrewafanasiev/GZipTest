@@ -9,7 +9,7 @@ namespace GZipTest
     {
         public ChunksInfo GetChunks(string inFile, int chunkSize)
         {
-            var chunkInfos = new List<Chunk>();
+            var chunks = new List<ChunkReadInfo>();
             long fileLength = new FileInfo(inFile).Length;
             long availableBytes = fileLength;
             int offset = 0;
@@ -19,14 +19,14 @@ namespace GZipTest
             {
                 int bytesCount = availableBytes < chunkSize ? (int) availableBytes : chunkSize;
 
-                chunkInfos.Add(new Chunk(id, offset, bytesCount));
+                chunks.Add(new ChunkReadInfo(id, offset, bytesCount));
 
                 availableBytes -= chunkSize;
                 offset += chunkSize;
                 id++;
             }
 
-            return new ChunksInfo(id, chunkInfos);
+            return new ChunksInfo(chunks);
         }
     }
 }

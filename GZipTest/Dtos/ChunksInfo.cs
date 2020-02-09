@@ -4,13 +4,13 @@ namespace GZipTest.Dtos
 {
     public class ChunksInfo
     {
-        public ChunksInfo(int maxChunkId, List<Chunk> chunks)
+        public ChunksInfo(List<ChunkReadInfo> chunks)
         {
-            MaxChunkId = maxChunkId;
             Chunks = chunks;
+            ChunksCount = chunks.Count;
         }
 
-        public int MaxChunkId { get; }
-        public List<Chunk> Chunks { get; }
+        public int ChunksCount { get; }
+        public List<ChunkReadInfo> Chunks { get; }
     }
 }

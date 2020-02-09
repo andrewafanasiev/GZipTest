@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GZipTest.Dtos;
 
 namespace GZipTest.Interfaces
 {
-    public interface IFileReader
+    public interface IChunkWriter
     {
-        byte[] GetChunkBytes(ChunkReadInfo chunkReadInfo);
+        void WriteToFile(string fileName, byte[] bytes);
     }
 }

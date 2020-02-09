@@ -4,7 +4,7 @@ namespace GZipTest.Interfaces
 {
     public interface IFileWriterTask
     {
-        void AddChunk(int id, Chunk chunk);
+        void AddChunk(int id, ChunkWriteInfo chunk);
 
         bool IsActive();
     }

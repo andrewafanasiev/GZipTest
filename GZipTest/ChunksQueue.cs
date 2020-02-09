@@ -14,7 +14,7 @@ namespace GZipTest
         private readonly IGZipCompressor _compressor;
         private readonly IFileWriterTask _fileWriterTask;
         private readonly IFileReader _fileReader;
-        private readonly Queue<Chunk> _chunks = new Queue<Chunk>();
+        private readonly Queue<ChunkReadInfo> _chunks = new Queue<ChunkReadInfo>();
         private readonly object _lockQueueObj = new object();
         private readonly object _lockExObj = new object();
 
@@ -35,11 +35,11 @@ namespace GZipTest
             }
         }
 
-        public void EnqueueChunk(Chunk chunk)
+        public void EnqueueChunk(ChunkReadInfo chunkReadInfo)
         {
             lock (_lockQueueObj)
             {
-                _chunks.Enqueue(chunk);
+                _chunks.Enqueue(chunkReadInfo);
                 Monitor.PulseAll(_lockQueueObj);
             }
         }
@@ -50,18 +50,18 @@ namespace GZipTest
             {
                 while (true)
                 {
-                    Chunk chunk;
+                    ChunkReadInfo chunkReadInfo;
 
                     lock (_lockQueueObj)
                     {
                         while (!_chunks.Any()) Monitor.Wait(_lockQueueObj);
-                        chunk = _chunks.Dequeue();
+                        chunkReadInfo = _chunks.Dequeue();
                     }
 
-                    if (chunk == null) return;
+                    if (chunkReadInfo == null) return;
 
-                    chunk.SetContentForRecording(_compressor.Execute(_fileReader.GetChunkBytes(chunk)));
-                    _fileWriterTask.AddChunk(chunk.Id, chunk);
+                    var chunkWriteInfo = new ChunkWriteInfo(chunkReadInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkReadInfo)));
+                    _fileWriterTask.AddChunk(chunkReadInfo.Id, chunkWriteInfo);
                 }
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace GZipTest
             }
         }
 
-        public bool IsErrorExists(out List<Exception> exceptions)
+        public bool IsErrorExist(out List<Exception> exceptions)
         {
             exceptions = null;
 

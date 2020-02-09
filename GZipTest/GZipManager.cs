@@ -25,17 +25,18 @@ namespace GZipTest
         {
             var chunkInfos = _filePreparation.GetChunks(_inFile, chunkSize);
 
-            using (var fileWriterTask = new FileWriterTask(_outFile, chunkInfos.MaxChunkId))
+            using (var fileWriterTask = new FileWriterTask(_outFile, chunkInfos.ChunksCount))
             using (var chunksQueue = new ChunksQueue(_inFile, workersCount, _compressorFactory.Create(actionType), fileWriterTask))
             {
                 foreach (var chunkInfo in chunkInfos.Chunks)
                 {
-                    chunksQueue.EnqueueChunk(new Chunk(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
+                    chunksQueue.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
                 }
 
                 while (true)
                 {
-                    if (chunksQueue.IsErrorExists(out List<Exception> queueExceptions) | fileWriterTask.IsErrorExists(out Exception writerException))
+                    //todo: double check patter on success
+                    if (chunksQueue.IsErrorExist(out List<Exception> queueExceptions) | fileWriterTask.IsErrorExist(out Exception writerException))
                     {
                         //todo: log for exceptions
                         Console.WriteLine("Something wrong");

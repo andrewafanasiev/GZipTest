@@ -16,13 +16,13 @@ namespace GZipTest
             _fileName = fileName;
         }
 
-        public byte[] GetChunkBytes(Chunk chunk)
+        public byte[] GetChunkBytes(ChunkReadInfo chunkReadInfo)
         {
             using (var reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                reader.BaseStream.Seek(chunk.Offset, SeekOrigin.Begin);
+                reader.BaseStream.Seek(chunkReadInfo.Offset, SeekOrigin.Begin);
 
-                return reader.ReadBytes(chunk.BytesCount);
+                return reader.ReadBytes(chunkReadInfo.BytesCount);
             }
         }
     }
