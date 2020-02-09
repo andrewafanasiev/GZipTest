@@ -22,25 +22,16 @@ namespace GZipTest
         {
             _fileName = fileName;
             _maxChunkId = maxChunkId;
-            _exception = null;
-            _thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker" };
+            _thread = new Thread(Consume) {IsBackground = true, Name = "Background worker (file writer)" };
             _thread.Start();
         }
 
         public void AddChunk(int id, Chunk chunk)
         {
-            bool lockTaken = false;
-
-            try
+            lock (_lockObj)
             {
-                Monitor.Enter(_lockObj, ref lockTaken);
-
                 _chunks.Add(id, chunk);
                 Monitor.Pulse(_lockObj);
-            }
-            finally
-            {
-                if (lockTaken) Monitor.Exit(_lockObj);
             }
         }
 
@@ -53,22 +44,15 @@ namespace GZipTest
                 while (true)
                 {
                     Chunk chunk;
-                    bool lockTaken = false;
 
-                    try
+                    lock (_lockObj)
                     {
-                        Monitor.Enter(_lockObj, ref lockTaken);
-
                         while (!_chunks.TryGetValue(id, out chunk))
                         {
                             if (_chunks.ContainsKey(DummyId)) return;
 
                             Monitor.Wait(_lockObj);
                         }
-                    }
-                    finally
-                    {
-                        if (lockTaken) Monitor.Exit(_lockObj);
                     }
 
                     WriteChunkToFile(chunk.Content);
@@ -93,22 +77,14 @@ namespace GZipTest
 
         public bool IsActive()
         {
-            bool lockTaken = false;
-
-            try
+            lock (_lockObj)
             {
-                Monitor.Enter(_lockObj, ref lockTaken);
-
                 if (_chunks.ContainsKey(_maxChunkId) && _chunks[_maxChunkId].IsWriteToFile)
                 {
                     return false;
                 }
 
                 return true;
-            }
-            finally
-            {
-                if (lockTaken) Monitor.Exit(_lockObj);
             }
         }
 

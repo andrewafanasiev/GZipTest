@@ -10,7 +10,7 @@ namespace GZipTest
     public class ChunksQueue : IChunksQueue, IDisposable
     {
         private readonly List<Thread> _threads;
-        private readonly List<Exception> _exceptions; //todo: volatile without lock?
+        private readonly List<Exception> _exceptions;
         private readonly IGZipCompressor _compressor;
         private readonly IFileWriterTask _fileWriterTask;
         private readonly IFileReader _fileReader;
@@ -28,7 +28,7 @@ namespace GZipTest
 
             for (int i = 0; i < workersCount; ++i)
             {
-                var thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker: {i}"};
+                var thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker (chunks queue): {i}"};
 
                 _threads.Add(thread);
                 thread.Start();
@@ -37,18 +37,10 @@ namespace GZipTest
 
         public void EnqueueChunk(Chunk chunk)
         {
-            bool lockTaken = false;
-
-            try
+            lock (_lockQueueObj)
             {
-                Monitor.Enter(_lockQueueObj, ref lockTaken);
-
                 _chunks.Enqueue(chunk);
                 Monitor.PulseAll(_lockQueueObj);
-            }
-            finally
-            {
-                if(lockTaken) Monitor.Exit(_lockQueueObj);
             }
         }
 
@@ -59,18 +51,11 @@ namespace GZipTest
                 while (true)
                 {
                     Chunk chunk;
-                    bool lockQueueTaken = false;
 
-                    try
+                    lock (_lockQueueObj)
                     {
-                        Monitor.Enter(_lockQueueObj, ref lockQueueTaken);
-
                         while (!_chunks.Any()) Monitor.Wait(_lockQueueObj);
                         chunk = _chunks.Dequeue();
-                    }
-                    finally
-                    {
-                        if (lockQueueTaken) Monitor.Exit(_lockQueueObj);
                     }
 
                     if (chunk == null) return;
@@ -81,62 +66,34 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
-                bool lockExTaken = false;
-
-                try
+                lock (_lockExObj)
                 {
-                    Monitor.Enter(_lockExObj, ref lockExTaken);
-
-                    //todo: volatile without lock?
                     _exceptions.Add(ex);
-                }
-                finally
-                {
-                    if (lockExTaken) Monitor.Exit(_lockExObj);
                 }
             }
         }
 
         public bool IsActive()
         {
-            bool lockTaken = false;
-
-            try
-            {
-                Monitor.Enter(_lockQueueObj, ref lockTaken);
-
+            lock(_lockQueueObj)
+            { 
                 return _chunks.Any() || !_threads.All(thread => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0);
-            }
-            finally
-            {
-                if (lockTaken) Monitor.Exit(_lockQueueObj);
             }
         }
 
         public bool IsErrorExists(out List<Exception> exceptions)
         {
             exceptions = null;
-            bool lockTaken = false;
 
-            try
+            lock (_lockExObj)
             {
-                Monitor.Enter(_lockExObj, ref lockTaken);
-
-                //todo: volatile without lock?
                 if (_exceptions.Any())
                 {
                     exceptions = _exceptions;
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            finally
-            {
-                if (lockTaken) Monitor.Exit(_lockExObj);
+
+                return false;
             }
         }
 
