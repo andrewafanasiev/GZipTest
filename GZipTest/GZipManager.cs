@@ -23,7 +23,7 @@ namespace GZipTest
 
         public void Execute(string actionType, int workersCount, int chunkSize)
         {
-            var chunkInfos = _filePreparation.GetChunks(_inFile, chunkSize);
+            var chunkInfos = actionType == Constants.Compress ? new FilePreparationForCompress().GetChunks(_inFile, chunkSize) : new FilePreparationForDecompress().GetChunks(_inFile, chunkSize);
 
             using (var fileWriterTask = new FileWriterTask(_outFile, chunkInfos.ChunksCount))
             using (var chunksQueue = new ChunksQueue(_inFile, workersCount, _compressorFactory.Create(actionType), fileWriterTask))
