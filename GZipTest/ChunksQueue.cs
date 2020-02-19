@@ -7,6 +7,9 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
+    /// <summary>
+    /// Queue for parallel processing of chunks
+    /// </summary>
     public class ChunksQueue : IChunksQueue, IDisposable
     {
         private readonly List<Thread> _threads;
@@ -35,6 +38,10 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Add a chunk to the queue
+        /// </summary>
+        /// <param name="chunkReadInfo">Chunk information for reading data from file</param>
         public void EnqueueChunk(ChunkReadInfo chunkReadInfo)
         {
             lock (_lockQueueObj)
@@ -73,6 +80,10 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Is queue does any work
+        /// </summary>
+        /// <returns>Result of checking</returns>
         public bool IsActive()
         {
             lock(_lockQueueObj)
@@ -81,6 +92,11 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Errors occurred while the queue was running
+        /// </summary>
+        /// <param name="exceptions">Errors</param>
+        /// <returns>Result of checking</returns>
         public bool IsErrorExist(out List<Exception> exceptions)
         {
             exceptions = null;

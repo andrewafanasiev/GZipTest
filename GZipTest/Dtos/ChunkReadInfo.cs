@@ -1,5 +1,8 @@
 ﻿namespace GZipTest.Dtos
 {
+    /// <summary>
+    /// Chunk information for reading data from file
+    /// </summary>
     public class ChunkReadInfo
     {
         public readonly int Id;

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GZipTest.Dtos;
+﻿using GZipTest.Dtos;
 
 namespace GZipTest.Interfaces
 {

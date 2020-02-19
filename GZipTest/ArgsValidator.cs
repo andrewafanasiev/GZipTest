@@ -4,10 +4,19 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
+    /// <summary>
+    /// Parameters validation
+    /// </summary>
     public class ArgsValidator : IArgsValidator
     {
         private const string MessageTemplate = "{0} file path invalid";
 
+        /// <summary>
+        /// Parameters validation
+        /// </summary>
+        /// <param name="args">Arguments</param>
+        /// <param name="errorMessage">Message for invalid arguments</param>
+        /// <returns>Result of checking</returns>
         public bool IsArgsValid(string[] args, out string errorMessage)
         {
             errorMessage = default(string);
@@ -51,6 +60,11 @@ namespace GZipTest
             return true;
         }
 
+        /// <summary>
+        /// Parameter number validation
+        /// </summary>
+        /// <param name="args">Arguments</param>
+        /// <returns>Result of checking</returns>
         public bool IsArgsCountValid(string[] args)
         {
             if (args?.Length != 3) return false;
@@ -58,6 +72,11 @@ namespace GZipTest
             return true;
         }
 
+        /// <summary>
+        /// Action name validation
+        /// </summary>
+        /// <param name="actionType">Action name</param>
+        /// <returns>Result of checking</returns>
         public bool IsActionTypeValid(string actionType)
         {
             if (actionType != Constants.Compress && actionType != Constants.Decompress) return false;
@@ -65,6 +84,11 @@ namespace GZipTest
             return true;
         }
 
+        /// <summary>
+        /// File path validation
+        /// </summary>
+        /// <param name="filePath">Path to file</param>
+        /// <returns>Result of checking</returns>
         public bool IsFilePathValid(string filePath)
         {
             if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
@@ -72,6 +96,11 @@ namespace GZipTest
             return true;
         }
 
+        /// <summary>
+        /// Checking the existence of a file in the system
+        /// </summary>
+        /// <param name="filePath">Path to file</param>
+        /// <returns>Result of checking</returns>
         public bool IsFileExists(string filePath)
         {
             return File.Exists(filePath);

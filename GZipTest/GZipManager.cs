@@ -6,6 +6,9 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
+    /// <summary>
+    /// Manager performing file compression or decompression
+    /// </summary>
     public class GZipManager : IGZipManager
     {
         private readonly ICompressorFactory _compressorFactory;
@@ -21,6 +24,12 @@ namespace GZipTest
             _compressorFactory = new CompressorFactory();
         }
 
+        /// <summary>
+        /// Perform file compression or decompression action
+        /// </summary>
+        /// <param name="actionType">Action name. Possible values: compress, decompress</param>
+        /// <param name="workersCount">Number of threads</param>
+        /// <param name="chunkSize">Chunk size in bytes</param>
         public void Execute(string actionType, int workersCount, int chunkSize)
         {
             var chunkInfos = actionType == Constants.Compress ? new FilePreparationForCompress().GetChunks(_inFile, chunkSize) : new FilePreparationForDecompress().GetChunks(_inFile, chunkSize);

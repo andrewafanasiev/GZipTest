@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GZipTest.Dtos
+﻿namespace GZipTest.Dtos
 {
+    /// <summary>
+    /// Chunk information for writing data in file
+    /// </summary>
     public class ChunkWriteInfo
     {
         public readonly int Id;
