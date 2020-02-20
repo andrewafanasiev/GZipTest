@@ -20,21 +20,28 @@ namespace GZipTest
                     var stopWatch = new Stopwatch();
 
                     stopWatch.Start();
-                    gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize);
+                    bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize);
                     stopWatch.Stop();
 
                     //todo: separate abstraction for information output
-                    Console.WriteLine("Process completed in {0} seconds", stopWatch.Elapsed.TotalSeconds);
+                    if (isOpSuccess)
+                    {
+                        Console.WriteLine("Process completed successfully in {0} seconds", stopWatch.Elapsed.TotalSeconds);
+                    }
+                    else
+                    {
+                        Console.WriteLine("An unexpected error occurred while running the application. See logs for details");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine(errorMessage);
+                    Console.WriteLine($"Validation error: {errorMessage}");
                 }
             }
             catch (Exception ex)
             {
                 //todo: separate abstraction for information output
-                Console.WriteLine($"Something wrong. Exception info: {ex}");
+                Console.WriteLine("An unexpected error occurred while running the application. See logs for details");
             }
 
             #if DEBUG

@@ -5,7 +5,7 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
-    public class FilePreparationForCompress : IFilePreparation
+    public class CompressionFileSplitter : IFileSplitter
     {
         public ChunksInfo GetChunks(string inFile, int chunkSize)
         {

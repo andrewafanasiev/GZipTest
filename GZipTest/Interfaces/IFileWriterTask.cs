@@ -7,5 +7,7 @@ namespace GZipTest.Interfaces
         void AddChunk(int id, ChunkWriteInfo chunk);
 
         bool IsActive();
+
+        bool IsErrorExist();
     }
 }

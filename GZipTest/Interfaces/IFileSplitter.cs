@@ -2,7 +2,7 @@
 
 namespace GZipTest.Interfaces
 {
-    public interface IFilePreparation
+    public interface IFileSplitter
     {
         ChunksInfo GetChunks(string inFile, int chunkSize);
     }

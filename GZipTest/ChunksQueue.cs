@@ -95,17 +95,13 @@ namespace GZipTest
         /// <summary>
         /// Errors occurred while the queue was running
         /// </summary>
-        /// <param name="exceptions">Errors</param>
         /// <returns>Result of checking</returns>
-        public bool IsErrorExist(out List<Exception> exceptions)
+        public bool IsErrorExist()
         {
-            exceptions = null;
-
             lock (_lockExObj)
             {
                 if (_exceptions.Any())
                 {
-                    exceptions = _exceptions;
                     return true;
                 }
 

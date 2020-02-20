@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using GZipTest.Dtos;
 using GZipTest.Interfaces;
@@ -12,7 +13,7 @@ namespace GZipTest
     public class GZipManager : IGZipManager
     {
         private readonly ICompressorFactory _compressorFactory;
-        private readonly IFilePreparation _filePreparation;
+        private readonly IFileSplitterFactory _fileSplitterFactory;
         private readonly string _inFile;
         private readonly string _outFile;
 
@@ -20,7 +21,7 @@ namespace GZipTest
         {
             _inFile = inFile;
             _outFile = outFile;
-            _filePreparation = new FilePreparationForCompress();
+            _fileSplitterFactory = new FileSplitterFactory();
             _compressorFactory = new CompressorFactory();
         }
 
@@ -30,9 +31,10 @@ namespace GZipTest
         /// <param name="actionType">Action name. Possible values: compress, decompress</param>
         /// <param name="workersCount">Number of threads</param>
         /// <param name="chunkSize">Chunk size in bytes</param>
-        public void Execute(string actionType, int workersCount, int chunkSize)
+        /// <returns>Operation result</returns>
+        public bool Execute(string actionType, int workersCount, int chunkSize)
         {
-            var chunkInfos = actionType == Constants.Compress ? new FilePreparationForCompress().GetChunks(_inFile, chunkSize) : new FilePreparationForDecompress().GetChunks(_inFile, chunkSize);
+            var chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
             using (var fileWriterTask = new FileWriterTask(_outFile, chunkInfos.ChunksCount))
             using (var chunksQueue = new ChunksQueue(_inFile, workersCount, _compressorFactory.Create(actionType), fileWriterTask))
@@ -44,24 +46,29 @@ namespace GZipTest
 
                 while (true)
                 {
-                    //todo: double check patter on success
-                    if (chunksQueue.IsErrorExist(out List<Exception> queueExceptions) | fileWriterTask.IsErrorExist(out Exception writerException))
+                    if (!IsErrorExist(chunksQueue, fileWriterTask))
                     {
-                        //todo: log for exceptions
-                        Console.WriteLine("Something wrong");
-                        Console.WriteLine("Queue exception: {0}", queueExceptions.FirstOrDefault());
-                        Console.WriteLine("FileWriter exception: {0}", writerException);
-                        break;
+                        if (IsActiveOp(chunksQueue, fileWriterTask))
+                        {
+                            if (!IsErrorExist(chunksQueue, fileWriterTask)) return true;
+
+                            return false;
+                        }
                     }
 
-                    if (!chunksQueue.IsActive() && !fileWriterTask.IsActive())
-                    {
-                        //todo: log for success operation
-                        Console.WriteLine("Operation success");
-                        break;
-                    }
+                    return false;
                 }
             }
+        }
+
+        private bool IsActiveOp(IChunksQueue chunksQueue, IFileWriterTask fileWriterTask)
+        {
+            return chunksQueue.IsActive() || fileWriterTask.IsActive();
+        }
+
+        private bool IsErrorExist(IChunksQueue chunksQueue, IFileWriterTask fileWriterTask)
+        {
+            return chunksQueue.IsErrorExist() || fileWriterTask.IsErrorExist();
         }
     }
 }

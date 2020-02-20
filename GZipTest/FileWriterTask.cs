@@ -77,15 +77,9 @@ namespace GZipTest
             }
         }
 
-        public bool IsErrorExist(out Exception exception)
+        public bool IsErrorExist()
         {
-            exception = null;
-
-            if (_exception != null)
-            {
-                exception = _exception;
-                return true;
-            }
+            if (_exception != null) return true;
 
             return false;
         }

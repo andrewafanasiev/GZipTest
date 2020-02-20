@@ -11,6 +11,7 @@
         /// <param name="actionType">Action name. Possible values: compress, decompress</param>
         /// <param name="workersCount">Number of threads</param>
         /// <param name="chunkSize">Chunk size in bytes</param>
-        void Execute(string actionType, int workersCount, int chunkSize);
+        /// <returns>Operation result</returns>
+        bool Execute(string actionType, int workersCount, int chunkSize);
     }
 }
