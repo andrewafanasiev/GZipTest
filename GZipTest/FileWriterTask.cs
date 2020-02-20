@@ -51,7 +51,7 @@ namespace GZipTest
                     {
                         while (!_chunks.TryGetValue(id, out chunk))
                         {
-                            if (_chunks.ContainsKey(DummyId) || id >= _chunksCount - 1) return;
+                            if (_chunks.ContainsKey(DummyId) || id > _chunksCount - 1) return;
 
                             Monitor.Wait(_lockChunksObj);
                         }
