@@ -19,7 +19,7 @@ namespace GZipTest
         /// <returns>Result of checking</returns>
         public bool IsArgsValid(string[] args, out string errorMessage)
         {
-            errorMessage = default(string);
+            errorMessage = null;
 
             if (!IsArgsCountValid(args))
             {
@@ -67,9 +67,7 @@ namespace GZipTest
         /// <returns>Result of checking</returns>
         public bool IsArgsCountValid(string[] args)
         {
-            if (args?.Length != 3) return false;
-
-            return true;
+            return args?.Length == 3;
         }
 
         /// <summary>
@@ -79,9 +77,7 @@ namespace GZipTest
         /// <returns>Result of checking</returns>
         public bool IsActionTypeValid(string actionType)
         {
-            if (actionType != Constants.Compress && actionType != Constants.Decompress) return false;
-
-            return true;
+            return actionType == Constants.Compress || actionType == Constants.Decompress;
         }
 
         /// <summary>
@@ -91,9 +87,7 @@ namespace GZipTest
         /// <returns>Result of checking</returns>
         public bool IsFilePathValid(string filePath)
         {
-            if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
-
-            return true;
+            return filePath.IndexOfAny(Path.GetInvalidPathChars()) == -1;
         }
 
         /// <summary>
