@@ -1,4 +1,4 @@
-﻿using System;
+﻿using GZipTest.Interfaces;
 using NUnit.Framework;
 
 namespace GZipTest.Tests
@@ -6,56 +6,106 @@ namespace GZipTest.Tests
     [TestFixture]
     public class ArgsValidatorTests
     {
+        private readonly IArgsValidator _argsValidator;
+
+        public ArgsValidatorTests()
+        {
+            _argsValidator = new ArgsValidator();
+        }
+
         [Test]
-        public void CorrectArgsCount()
+        public void ValidationFailsOnArgsCount()
+        {
+            var argsValidator = new ArgsValidator();
+
+            Assert.IsFalse(argsValidator.IsArgsValid(null, out string message));
+            Assert.IsTrue(message.Contains("Parameters are expected:\n1. Action. Possible values"));
+        }
+
+        [Test]
+        public void ValidationFailsOnUnsupportedActionType()
+        {
+            var args = new[] { "myActionType", "filePath1", "filePath2" };
+
+            Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
+            Assert.IsTrue(message.Contains("Unsupported action type"));
+        }
+
+        [Test]
+        public void ValidationFailsOnInvalidInputFileName()
+        {
+            var args = new[] { Constants.Compress, "C:\\f|ile.zip", "filePath2" };
+
+            Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
+            Assert.IsTrue(message.Contains("Input file path invalid"));
+        }
+
+        [Test]
+        public void ValidationFailsOnInvalidOutputFileName()
+        {
+            var args = new[] { Constants.Compress, "C:\\file1.zip", "C:\\fi|le2.zip.gz" };
+
+            Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
+            Assert.IsTrue(message.Contains("Output file path invalid"));
+        }
+
+        [Test]
+        public void ValidArgsCount()
         {
             var args = new[] { "1", "2", "3" };
-            var argsValidator = new ArgsValidator();
 
-            Assert.IsTrue(argsValidator.IsArgsCountValid(args));
+            Assert.IsTrue(_argsValidator.IsArgsCountValid(args));
         }
 
         [Test]
-        public void NotCorrectArgsCount()
+        public void NotValidArgsCount()
         {
             var args = new[] { "1" };
-            var argsValidator = new ArgsValidator();
 
-            Assert.IsFalse(argsValidator.IsArgsCountValid(args));
+            Assert.IsFalse(_argsValidator.IsArgsCountValid(args));
         }
 
         [Test]
-        public void NotValidArgs()
+        public void NotValidNullableArgs()
         {
-            var argsValidator = new ArgsValidator();
-
-            Assert.IsFalse(argsValidator.IsArgsCountValid(null));
+            Assert.IsFalse(_argsValidator.IsArgsCountValid(null));
         }
 
         [Test]
         public void ValidActionTypes()
         {
-            var argsValidator = new ArgsValidator();
-
-            Assert.IsTrue(argsValidator.IsActionTypeValid(Constants.Compress));
-            Assert.IsTrue(argsValidator.IsActionTypeValid(Constants.Decompress));
+            Assert.IsTrue(_argsValidator.IsActionTypeValid(Constants.Compress));
+            Assert.IsTrue(_argsValidator.IsActionTypeValid(Constants.Decompress));
         }
 
         [Test]
         public void NotValidActionType()
         {
-            var argsValidator = new ArgsValidator();
             const string actionType = "myCustomActionType";
 
-            Assert.IsFalse(argsValidator.IsActionTypeValid(actionType));
+            Assert.IsFalse(_argsValidator.IsActionTypeValid(actionType));
         }
 
         [Test]
         public void NotValidNullableActionType()
         {
-            var argsValidator = new ArgsValidator();
+            Assert.IsFalse(_argsValidator.IsActionTypeValid(null));
+        }
 
-            Assert.IsFalse(argsValidator.IsActionTypeValid(null));
+        [Test]
+        public void PathContainsInvalidChars()
+        {
+            const string path = @"C:\Users\SomeUser\Documents\fil|e.zip";
+
+            Assert.IsFalse(_argsValidator.IsFilePathValid(path));
+        }
+
+        [Test]
+        public void ValidFilePath()
+        {
+            const string path = @"C:\Users\SomeUser\Documents\file.zip";
+
+            Assert.IsTrue(_argsValidator.IsFilePathValid(path));
         }
     }
 }

@@ -50,9 +50,7 @@ namespace GZipTest
                     {
                         if (IsActiveOp(chunksQueue, fileWriterTask))
                         {
-                            if (!IsErrorExist(chunksQueue, fileWriterTask)) return true;
-
-                            return false;
+                            return !IsErrorExist(chunksQueue, fileWriterTask);
                         }
                     }
 

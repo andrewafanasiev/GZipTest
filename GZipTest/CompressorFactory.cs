@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.IO;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -14,7 +14,7 @@ namespace GZipTest
                 case Constants.Decompress:
                     return new GZipDecompress();
                 default:
-                    throw new InvalidEnumArgumentException($"Could not find action with name: {actionType}");
+                    throw new InvalidDataException($"Could not find action with name: {actionType}");
             }
         }
     }

@@ -23,13 +23,13 @@ namespace GZipTest
 
             if (!IsArgsCountValid(args))
             {
-                errorMessage = "Parameters ara expected:\n1. Action. Possible values: compress or decompress\n2. Input file path\n3. Output file path\n";
+                errorMessage = "Parameters are expected:\n1. Action. Possible values: compress or decompress\n2. Input file path\n3. Output file path\n";
                 return false;
             }
 
             if (!IsActionTypeValid(args[0]))
             {
-                errorMessage = "Unsupported action type";
+                errorMessage = "Unsupported action type. Possible values: compress or decompress";
                 return false;
             }
 
