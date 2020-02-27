@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using GZipTest.Dtos;
+﻿using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -15,14 +11,19 @@ namespace GZipTest
         private readonly ICompressorFactory _compressorFactory;
         private readonly IFileSplitterFactory _fileSplitterFactory;
         private readonly string _inFile;
-        private readonly string _outFile;
+        private readonly ITaskFactory _taskFactory;
+        private readonly ISourceReader _sourceReader;
+        private readonly IChunkWriter _chunkWriter;
 
-        public GZipManager(string inFile, string outFile)
+        public GZipManager(string inFile, ISourceReader reader, IChunkWriter chunkWriter,
+            IFileSplitterFactory fileSplitterFactory, ICompressorFactory compressorFactory, ITaskFactory taskFactory)
         {
+            _chunkWriter = chunkWriter;
+            _sourceReader = reader;
+            _taskFactory = taskFactory;
             _inFile = inFile;
-            _outFile = outFile;
-            _fileSplitterFactory = new FileSplitterFactory();
-            _compressorFactory = new CompressorFactory();
+            _fileSplitterFactory = fileSplitterFactory;
+            _compressorFactory = compressorFactory;
         }
 
         /// <summary>
@@ -36,9 +37,12 @@ namespace GZipTest
         {
             var chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
-            using (var fileWriterTask = new FileWriterTask(_outFile, chunkInfos.ChunksCount))
-            using (var chunksQueue = new ChunksQueue(_inFile, workersCount, _compressorFactory.Create(actionType), fileWriterTask))
+            using (var fileWriterTask = _taskFactory.CreatWriterTask(_chunkWriter, chunkInfos.ChunksCount))
+            using (var chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader, _compressorFactory.Create(actionType), fileWriterTask))
             {
+                fileWriterTask.Start();
+                chunksQueue.Start();
+
                 foreach (var chunkInfo in chunkInfos.Chunks)
                 {
                     chunksQueue.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
@@ -48,10 +52,12 @@ namespace GZipTest
                 {
                     if (!IsErrorExist(chunksQueue, fileWriterTask))
                     {
-                        if (IsActiveOp(chunksQueue, fileWriterTask))
+                        if (!IsActiveOp(chunksQueue, fileWriterTask))
                         {
                             return !IsErrorExist(chunksQueue, fileWriterTask);
                         }
+
+                        continue;
                     }
 
                     return false;
@@ -59,14 +65,22 @@ namespace GZipTest
             }
         }
 
-        private bool IsActiveOp(IChunksQueue chunksQueue, IFileWriterTask fileWriterTask)
+        /// <summary>
+        /// Is operation active
+        /// </summary>
+        /// <returns>Result of checking</returns>
+        public bool IsActiveOp(IChunksQueue chunksQueue, IWriterTask writerTask)
         {
-            return chunksQueue.IsActive() || fileWriterTask.IsActive();
+            return chunksQueue.IsActive() || writerTask.IsActive();
         }
 
-        private bool IsErrorExist(IChunksQueue chunksQueue, IFileWriterTask fileWriterTask)
+        /// <summary>
+        /// An error occurred during the execution
+        /// </summary>
+        /// <returns>Result of checking</returns>
+        public bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask)
         {
-            return chunksQueue.IsErrorExist() || fileWriterTask.IsErrorExist();
+            return chunksQueue.IsErrorExist() || writerTask.IsErrorExist();
         }
     }
 }

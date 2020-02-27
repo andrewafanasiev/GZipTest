@@ -9,16 +9,22 @@ namespace GZipTest
     /// <summary>
     /// Writing data to file
     /// </summary>
-    public class ChunkWriter : IChunkWriter
+    public class FileChunkWriter : IChunkWriter
     {
+        private readonly string _outFile;
+
+        public FileChunkWriter(string outFile)
+        {
+            _outFile = outFile;
+        }
+
         /// <summary>
         /// Writing data to file
         /// </summary>
-        /// <param name="fileName">Path to file</param>
         /// <param name="bytes">Data</param>
-        public void WriteToFile(string fileName, byte[] bytes)
+        public void WriteToFile(byte[] bytes)
         {
-            using (var writer = new BinaryWriter(File.Open(fileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
+            using (var writer = new BinaryWriter(File.Open(_outFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
             {
                 writer.BaseStream.Seek(0, SeekOrigin.End);
                 writer.Write(bytes);

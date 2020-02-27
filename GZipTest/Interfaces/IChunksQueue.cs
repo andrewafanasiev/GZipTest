@@ -10,6 +10,11 @@ namespace GZipTest.Interfaces
     public interface IChunksQueue
     {
         /// <summary>
+        /// Start workers for queue
+        /// </summary>
+        void Start();
+
+        /// <summary>
         /// Add a chunk to the queue
         /// </summary>
         /// <param name="chunkReadInfo">Chunk information for reading data from file</param>

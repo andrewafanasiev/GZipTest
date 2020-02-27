@@ -16,7 +16,8 @@ namespace GZipTest
                 {
                     string actionType = args[0], inFile = args[1], outFile = args[2];
                     int chunkSize = Environment.SystemPageSize * 1024;
-                    var gzipManager = new GZipManager(inFile, outFile);
+                    var gzipManager = new GZipManager(inFile, new FileReader(inFile), new FileChunkWriter(outFile),
+                        new FileSplitterFactory(), new CompressorFactory(), new TaskFactory());
                     var stopWatch = new Stopwatch();
 
                     stopWatch.Start();
@@ -38,7 +39,7 @@ namespace GZipTest
                     Console.WriteLine($"Validation error: {errorMessage}");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //todo: separate abstraction for information output
                 Console.WriteLine("An unexpected error occurred while running the application. See logs for details");

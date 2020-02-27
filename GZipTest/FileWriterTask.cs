@@ -8,26 +8,37 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
-    public class FileWriterTask : IFileWriterTask, IDisposable
+    /// <summary>
+    /// Task for write chunks in file
+    /// </summary>
+    public class FileWriterTask : IWriterTask, IDisposable
     {
         private readonly Thread _thread;
         private volatile Exception _exception;
         private readonly Dictionary<int, ChunkWriteInfo> _chunks = new Dictionary<int, ChunkWriteInfo>();
         private readonly IChunkWriter _chunkWriter;
         private readonly object _lockChunksObj = new object();
-        private readonly string _fileName;
         private const int DummyId = -1;
         private readonly int _chunksCount;
 
-        public FileWriterTask(string fileName, int chunksCount)
+        public FileWriterTask(IChunkWriter chunkWriter, int chunksCount)
         {
-            _fileName = fileName;
             _chunksCount = chunksCount;
-            _chunkWriter = new ChunkWriter();
+            _chunkWriter = chunkWriter;
             _thread = new Thread(Consume) {IsBackground = true, Name = "Background worker (file writer)" };
-            _thread.Start();
         }
 
+        /// <summary>
+        /// Start worker for file writer
+        /// </summary>
+        public void Start()
+        {
+            if(_thread.ThreadState.Equals(ThreadState.Unstarted)) _thread.Start();
+        }
+
+        /// <summary>
+        /// Add chunk to write to file
+        /// </summary>
         public void AddChunk(int id, ChunkWriteInfo chunk)
         {
             lock (_lockChunksObj)
@@ -37,6 +48,9 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Chunks processing
+        /// </summary>
         void Consume()
         {
             try
@@ -59,7 +73,7 @@ namespace GZipTest
                         _chunks.Remove(id);
                     }
 
-                    _chunkWriter.WriteToFile(_fileName, chunk.Content);
+                    _chunkWriter.WriteToFile(chunk.Content);
                     id++;
                 }
             }
@@ -69,6 +83,10 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Is file writer task does any work
+        /// </summary>
+        /// <returns>Result of checking</returns>
         public bool IsActive()
         {
             lock (_lockChunksObj)
@@ -77,6 +95,10 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Is error occurred while the task was running
+        /// </summary>
+        /// <returns>Result of checking</returns>
         public bool IsErrorExist()
         {
             if (_exception != null) return true;

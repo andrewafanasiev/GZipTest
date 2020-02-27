@@ -7,7 +7,10 @@ using GZipTest.Interfaces;
 
 namespace GZipTest
 {
-    public class FileReader : IFileReader
+    /// <summary>
+    /// Read data from file
+    /// </summary>
+    public class FileReader : ISourceReader
     {
         private readonly string _fileName;
 
@@ -16,6 +19,11 @@ namespace GZipTest
             _fileName = fileName;
         }
 
+        /// <summary>
+        /// Get chunk content from file
+        /// </summary>
+        /// <param name="chunkReadInfo">Info about chunk</param>
+        /// <returns>Chunk content</returns>
         public byte[] GetChunkBytes(ChunkReadInfo chunkReadInfo)
         {
             using (var reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))

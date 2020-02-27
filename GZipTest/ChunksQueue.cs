@@ -15,17 +15,17 @@ namespace GZipTest
         private readonly List<Thread> _threads;
         private readonly List<Exception> _exceptions;
         private readonly IGZipCompressor _compressor;
-        private readonly IFileWriterTask _fileWriterTask;
-        private readonly IFileReader _fileReader;
+        private readonly IWriterTask _writerTask;
+        private readonly ISourceReader _fileReader;
         private readonly Queue<ChunkReadInfo> _chunks = new Queue<ChunkReadInfo>();
         private readonly object _lockQueueObj = new object();
         private readonly object _lockExObj = new object();
 
-        public ChunksQueue(string inFile, int workersCount, IGZipCompressor compressor, IFileWriterTask fileWriterTask)
+        public ChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
         {
             _compressor = compressor;
-            _fileReader = new FileReader(inFile);
-            _fileWriterTask = fileWriterTask;
+            _fileReader = reader;
+            _writerTask = writerTask;
             _exceptions = new List<Exception>();
             _threads = new List<Thread>();
 
@@ -34,7 +34,17 @@ namespace GZipTest
                 var thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker (chunks queue): {i}"};
 
                 _threads.Add(thread);
-                thread.Start();
+            }
+        }
+
+        /// <summary>
+        /// Start workers for queue
+        /// </summary>
+        public void Start()
+        {
+            foreach (var thread in _threads)
+            {
+                if (thread.ThreadState.Equals(ThreadState.Unstarted)) thread.Start();
             }
         }
 
@@ -51,6 +61,9 @@ namespace GZipTest
             }
         }
 
+        /// <summary>
+        /// Chunks processing
+        /// </summary>
         void Consume()
         {
             try
@@ -68,7 +81,7 @@ namespace GZipTest
                     if (chunkReadInfo == null) return;
 
                     var chunkWriteInfo = new ChunkWriteInfo(chunkReadInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkReadInfo)));
-                    _fileWriterTask.AddChunk(chunkReadInfo.Id, chunkWriteInfo);
+                    _writerTask.AddChunk(chunkReadInfo.Id, chunkWriteInfo);
                 }
             }
             catch (Exception ex)

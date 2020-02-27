@@ -13,5 +13,17 @@
         /// <param name="chunkSize">Chunk size in bytes</param>
         /// <returns>Operation result</returns>
         bool Execute(string actionType, int workersCount, int chunkSize);
+
+        /// <summary>
+        /// Is operation active
+        /// </summary>
+        /// <returns>Result of checking</returns>
+        bool IsActiveOp(IChunksQueue chunksQueue, IWriterTask writerTask);
+
+        /// <summary>
+        /// An error occurred during the execution
+        /// </summary>
+        /// <returns>Result of checking</returns>
+        bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask);
     }
 }
