@@ -1,17 +1,13 @@
-﻿using GZipTest.Dtos;
+﻿using System;
+using GZipTest.Dtos;
 
 namespace GZipTest.Interfaces
 {
     /// <summary>
     /// Task for write chunks in receiver
     /// </summary>
-    public interface IWriterTask
+    public interface IWriterTask : IDisposable
     {
-        /// <summary>
-        /// Start worker for file writer
-        /// </summary>
-        void Start();
-
         /// <summary>
         /// Add chunk to write to file
         /// </summary>

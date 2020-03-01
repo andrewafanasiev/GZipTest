@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using GZipTest.Dtos;
+using GZipTest.Helpers;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -34,17 +35,7 @@ namespace GZipTest
                 var thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker (chunks queue): {i}"};
 
                 _threads.Add(thread);
-            }
-        }
-
-        /// <summary>
-        /// Start workers for queue
-        /// </summary>
-        public void Start()
-        {
-            foreach (var thread in _threads)
-            {
-                if (thread.ThreadState.Equals(ThreadState.Unstarted)) thread.Start();
+                thread.Start();
             }
         }
 
@@ -100,8 +91,9 @@ namespace GZipTest
         public bool IsActive()
         {
             lock(_lockQueueObj)
-            { 
-                return _chunks.Any() || !_threads.All(thread => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0);
+            {
+                return _chunks.Any() || _threads.Any(thread =>
+                           thread.GetSimpleThreadState() == ThreadState.Running);
             }
         }
 
@@ -113,19 +105,17 @@ namespace GZipTest
         {
             lock (_lockExObj)
             {
-                if (_exceptions.Any())
-                {
-                    return true;
-                }
-
-                return false;
+                return _exceptions.Any();
             }
         }
 
         public void Dispose()
         {
             _threads.ForEach(thread => EnqueueChunk(null));
-            _threads.ForEach(thread => thread.Join());
+            _threads.ForEach(thread =>
+            {
+                if (thread.GetSimpleThreadState() != ThreadState.Unstarted) thread.Join();
+            });
         }
     }
 }

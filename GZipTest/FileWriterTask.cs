@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using GZipTest.Dtos;
+using GZipTest.Helpers;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -21,19 +22,12 @@ namespace GZipTest
         private const int DummyId = -1;
         private readonly int _chunksCount;
 
-        public FileWriterTask(IChunkWriter chunkWriter, int chunksCount)
+        public FileWriterTask(int chunksCount, IChunkWriter chunkWriter)
         {
             _chunksCount = chunksCount;
             _chunkWriter = chunkWriter;
             _thread = new Thread(Consume) {IsBackground = true, Name = "Background worker (file writer)" };
-        }
-
-        /// <summary>
-        /// Start worker for file writer
-        /// </summary>
-        public void Start()
-        {
-            if(_thread.ThreadState.Equals(ThreadState.Unstarted)) _thread.Start();
+            _thread.Start();
         }
 
         /// <summary>
@@ -91,7 +85,7 @@ namespace GZipTest
         {
             lock (_lockChunksObj)
             {
-                return _chunks.Any() && (_thread.ThreadState & (ThreadState.Stopped | ThreadState.Unstarted)) == 0;
+                return _chunks.Any() || _thread.GetSimpleThreadState() == ThreadState.Running;
             }
         }
 
@@ -101,15 +95,16 @@ namespace GZipTest
         /// <returns>Result of checking</returns>
         public bool IsErrorExist()
         {
-            if (_exception != null) return true;
-
-            return false;
+            return _exception != null;
         }
 
         public void Dispose()
         {
-            AddChunk(DummyId, null);
-            _thread.Join();
+            if (_thread.GetSimpleThreadState() != ThreadState.Unstarted)
+            {
+                AddChunk(DummyId, null);
+                _thread.Join();
+            }
         }
     }
 }

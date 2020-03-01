@@ -1,4 +1,5 @@
-﻿using GZipTest.Dtos;
+﻿using System;
+using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
 namespace GZipTest
@@ -37,12 +38,10 @@ namespace GZipTest
         {
             var chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
-            using (var fileWriterTask = _taskFactory.CreatWriterTask(_chunkWriter, chunkInfos.ChunksCount))
-            using (var chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader, _compressorFactory.Create(actionType), fileWriterTask))
+            using (var fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter))
+            using (var chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader,
+                _compressorFactory.Create(actionType), fileWriterTask))
             {
-                fileWriterTask.Start();
-                chunksQueue.Start();
-
                 foreach (var chunkInfo in chunkInfos.Chunks)
                 {
                     chunksQueue.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
