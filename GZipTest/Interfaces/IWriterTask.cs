@@ -23,6 +23,6 @@ namespace GZipTest.Interfaces
         /// Is error occurred while the task was running
         /// </summary>
         /// <returns>Result of checking</returns>
-        bool IsErrorExist();
+        bool IsErrorExist(out Exception error);
     }
 }

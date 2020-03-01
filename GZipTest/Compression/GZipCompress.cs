@@ -3,22 +3,35 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.Compression
 {
     public class GZipCompress : IGZipCompressor
     {
-        public byte[] Execute(byte[] originalBytes)
+        /// <summary>
+        /// Bytes compression
+        /// </summary>
+        /// <param name="bytes">Content</param>
+        /// <returns>Result of compression</returns>
+        public byte[] Execute(byte[] bytes)
         {
-            using (var output = new MemoryStream())
+            try
             {
-                using (var compressStream = new GZipStream(output, CompressionMode.Compress))
+                using (var output = new MemoryStream())
                 {
-                    compressStream.Write(originalBytes, 0, originalBytes.Length);
-                }
+                    using (var compressStream = new GZipStream(output, CompressionMode.Compress))
+                    {
+                        compressStream.Write(bytes, 0, bytes.Length);
+                    }
 
-                return output.ToArray();
+                    return output.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new CompressorException("An error occurred during compression", ex);
             }
         }
     }

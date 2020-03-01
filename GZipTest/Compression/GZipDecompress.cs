@@ -1,24 +1,38 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.Compression
 {
     public class GZipDecompress : IGZipCompressor
     {
-        public byte[] Execute(byte[] compressedBytes)
+        /// <summary>
+        /// Bytes decompression
+        /// </summary>
+        /// <param name="bytes">Content</param>
+        /// <returns>Result of decompression</returns>
+        public byte[] Execute(byte[] bytes)
         {
-            using (var output = new MemoryStream())
+            try
             {
-                using (var input = new MemoryStream(compressedBytes))
+                using (var output = new MemoryStream())
                 {
-                    using (var decompressStream = new GZipStream(input, CompressionMode.Decompress))
+                    using (var input = new MemoryStream(bytes))
                     {
-                        decompressStream.CopyTo(output);
-                    }
+                        using (var decompressStream = new GZipStream(input, CompressionMode.Decompress))
+                        {
+                            decompressStream.CopyTo(output);
+                        }
 
-                    return output.ToArray();
+                        return output.ToArray();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new CompressorException("An error occurred during decompression", ex);
             }
         }
     }

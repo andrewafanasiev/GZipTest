@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GZipTest.Dtos;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.IO
@@ -26,11 +27,18 @@ namespace GZipTest.IO
         /// <returns>Chunk content</returns>
         public byte[] GetChunkBytes(ChunkReadInfo chunkReadInfo)
         {
-            using (var reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            try
             {
-                reader.BaseStream.Seek(chunkReadInfo.Offset, SeekOrigin.Begin);
+                using (var reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                {
+                    reader.BaseStream.Seek(chunkReadInfo.Offset, SeekOrigin.Begin);
 
-                return reader.ReadBytes(chunkReadInfo.BytesCount);
+                    return reader.ReadBytes(chunkReadInfo.BytesCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ReaderException($"An error occurred while trying to read a data block from a file {_fileName}", ex);
             }
         }
     }

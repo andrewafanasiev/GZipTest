@@ -1,32 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using GZipTest.Dtos;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.IO
 {
     public class CompressionFileSplitter : IFileSplitter
     {
+        /// <summary>
+        /// Split file to chunks
+        /// </summary>
+        /// <param name="inFile">Input file</param>
+        /// <param name="chunkSize">Chunk size</param>
+        /// <returns>Split result</returns>
         public ChunksInfo GetChunks(string inFile, int chunkSize)
         {
-            var chunks = new List<ChunkReadInfo>();
-            long fileLength = new FileInfo(inFile).Length;
-            long availableBytes = fileLength;
-            int offset = 0;
-            int id = 0;
-
-            while (availableBytes > 0)
+            try
             {
-                int bytesCount = availableBytes < chunkSize ? (int) availableBytes : chunkSize;
+                var chunks = new List<ChunkReadInfo>();
+                long fileLength = new FileInfo(inFile).Length;
+                long availableBytes = fileLength;
+                int offset = 0;
+                int id = 0;
 
-                chunks.Add(new ChunkReadInfo(id, offset, bytesCount));
+                while (availableBytes > 0)
+                {
+                    int bytesCount = availableBytes < chunkSize ? (int) availableBytes : chunkSize;
 
-                availableBytes -= chunkSize;
-                offset += chunkSize;
-                id++;
+                    chunks.Add(new ChunkReadInfo(id, offset, bytesCount));
+
+                    availableBytes -= chunkSize;
+                    offset += chunkSize;
+                    id++;
+                }
+
+                return new ChunksInfo(chunks);
             }
-
-            return new ChunksInfo(chunks);
+            catch (Exception ex)
+            {
+                throw new SplitterException($"Errors occurred while splitting the file {inFile} for compression", ex);
+            }
         }
     }
 }

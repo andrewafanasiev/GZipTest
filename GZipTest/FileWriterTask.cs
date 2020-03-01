@@ -93,9 +93,11 @@ namespace GZipTest
         /// Is error occurred while the task was running
         /// </summary>
         /// <returns>Result of checking</returns>
-        public bool IsErrorExist()
+        public bool IsErrorExist(out Exception error)
         {
-            return _exception != null;
+            error = _exception;
+
+            return error != null;
         }
 
         public void Dispose()

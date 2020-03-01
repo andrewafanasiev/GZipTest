@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
@@ -33,8 +35,9 @@ namespace GZipTest
         /// <param name="actionType">Action name. Possible values: compress, decompress</param>
         /// <param name="workersCount">Number of threads</param>
         /// <param name="chunkSize">Chunk size in bytes</param>
+        /// <param name="errors">Exceptions</param>
         /// <returns>Operation result</returns>
-        public bool Execute(string actionType, int workersCount, int chunkSize)
+        public bool Execute(string actionType, int workersCount, int chunkSize, out List<Exception> errors)
         {
             var chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
@@ -49,16 +52,17 @@ namespace GZipTest
 
                 while (true)
                 {
-                    if (!IsErrorExist(chunksQueue, fileWriterTask))
+                    if (!IsErrorExist(chunksQueue, fileWriterTask, out List<Exception> exceptions))
                     {
                         if (!IsActiveOp(chunksQueue, fileWriterTask))
                         {
-                            return !IsErrorExist(chunksQueue, fileWriterTask);
+                            return !IsErrorExist(chunksQueue, fileWriterTask, out errors);
                         }
 
                         continue;
                     }
 
+                    errors = exceptions;
                     return false;
                 }
             }
@@ -77,9 +81,21 @@ namespace GZipTest
         /// An error occurred during the execution
         /// </summary>
         /// <returns>Result of checking</returns>
-        public bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask)
+        public bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask, out List<Exception> errors)
         {
-            return chunksQueue.IsErrorExist() || writerTask.IsErrorExist();
+            if (chunksQueue.IsErrorExist(out List<Exception> queueErrors) |
+                writerTask.IsErrorExist(out Exception writerError))
+            {
+                errors = new List<Exception>();
+
+                if (queueErrors != null) errors = queueErrors;
+                if (writerError != null) errors.Add(writerError);
+
+                return true;
+            }
+
+            errors = null;
+            return false;
         }
     }
 }

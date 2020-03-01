@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using GZipTest.Factories;
 using GZipTest.Interfaces;
@@ -13,9 +14,9 @@ namespace GZipTest
         {
             try
             {
-                IArgsValidator argsValidator = new ArgsValidator();
+                var argsValidator = new ArgsValidator();
 
-                if (argsValidator.IsArgsValid(args, out string errorMessage))
+                if (argsValidator.IsArgsValid(args, out string validationMessage))
                 {
                     string actionType = args[0], inFile = args[1], outFile = args[2];
                     int chunkSize = Environment.SystemPageSize * 1024;
@@ -24,28 +25,20 @@ namespace GZipTest
                     var stopWatch = new Stopwatch();
 
                     stopWatch.Start();
-                    bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize);
+                    bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize, out List<Exception> errors);
                     stopWatch.Stop();
 
-                    //todo: separate abstraction for information output
-                    if (isOpSuccess)
-                    {
-                        Console.WriteLine("Process completed successfully in {0} seconds", stopWatch.Elapsed.TotalSeconds);
-                    }
-                    else
-                    {
-                        Console.WriteLine("An unexpected error occurred while running the application. See logs for details");
-                    }
+                    if (isOpSuccess) IOManager.OpSuccess(stopWatch.Elapsed.TotalSeconds);
+                    else IOManager.OpError(errors);
                 }
                 else
                 {
-                    Console.WriteLine($"Validation error: {errorMessage}");
+                    IOManager.ValidationError(validationMessage);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //todo: separate abstraction for information output
-                Console.WriteLine("An unexpected error occurred while running the application. See logs for details");
+                IOManager.OpError(ex);
             }
 
             #if DEBUG

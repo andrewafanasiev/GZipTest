@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.IO
@@ -24,10 +25,17 @@ namespace GZipTest.IO
         /// <param name="bytes">Data</param>
         public void WriteToFile(byte[] bytes)
         {
-            using (var writer = new BinaryWriter(File.Open(_outFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
+            try
             {
-                writer.BaseStream.Seek(0, SeekOrigin.End);
-                writer.Write(bytes);
+                using (var writer = new BinaryWriter(File.Open(_outFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
+                {
+                    writer.BaseStream.Seek(0, SeekOrigin.End);
+                    writer.Write(bytes);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new WriterException($"An error occurred while trying to write data block to file {_outFile}", ex);
             }
         }
     }

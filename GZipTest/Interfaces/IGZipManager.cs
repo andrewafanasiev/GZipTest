@@ -1,4 +1,7 @@
-﻿namespace GZipTest.Interfaces
+﻿using System;
+using System.Collections.Generic;
+
+namespace GZipTest.Interfaces
 {
     /// <summary>
     /// Manager performing file compression or decompression
@@ -11,8 +14,9 @@
         /// <param name="actionType">Action name. Possible values: compress, decompress</param>
         /// <param name="workersCount">Number of threads</param>
         /// <param name="chunkSize">Chunk size in bytes</param>
+        /// <param name="errors">Exceptions</param>
         /// <returns>Operation result</returns>
-        bool Execute(string actionType, int workersCount, int chunkSize);
+        bool Execute(string actionType, int workersCount, int chunkSize, out List<Exception> errors);
 
         /// <summary>
         /// Is operation active
@@ -24,6 +28,6 @@
         /// An error occurred during the execution
         /// </summary>
         /// <returns>Result of checking</returns>
-        bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask);
+        bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask, out List<Exception> errors);
     }
 }

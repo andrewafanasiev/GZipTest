@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using GZipTest.Dtos;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 
 namespace GZipTest.IO
@@ -10,36 +11,50 @@ namespace GZipTest.IO
     {
         public static readonly byte[] DefaultHeader = { 0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 };
 
+        /// <summary>
+        /// Split file to chunks
+        /// </summary>
+        /// <param name="inFile">Input file</param>
+        /// <param name="chunkSize">Chunk size</param>
+        /// <returns>Split result</returns>
         public ChunksInfo GetChunks(string inFile, int chunkSize)
         {
-            var chunks = new List<ChunkReadInfo>();
-
-            using (var reader = new BinaryReader(File.Open(inFile, FileMode.Open, FileAccess.Read)))
+            try
             {
-                long fileLength = new FileInfo(inFile).Length;
-                byte[] header = reader.ReadBytes(DefaultHeader.Length);
-                long availableBytes = fileLength - header.Length;
-                var id = 0;
+                var chunks = new List<ChunkReadInfo>();
 
-                while (availableBytes > 0)
+                using (var reader = new BinaryReader(File.Open(inFile, FileMode.Open, FileAccess.Read)))
                 {
-                    List<byte> chunk = GetChunk(reader, header, chunkSize, ref availableBytes);
-                    int chunkLength = chunk.Count;
-                    long startPosition = 0;
+                    long fileLength = new FileInfo(inFile).Length;
+                    byte[] header = reader.ReadBytes(DefaultHeader.Length);
+                    long availableBytes = fileLength - header.Length;
+                    var id = 0;
 
-                    if (id > 0)
+                    while (availableBytes > 0)
                     {
-                        startPosition = fileLength - availableBytes - header.Length - chunkLength;
+                        List<byte> chunk = GetChunk(reader, header, chunkSize, ref availableBytes);
+                        int chunkLength = chunk.Count;
+                        long startPosition = 0;
 
-                        if (startPosition + header.Length + chunkLength == fileLength) startPosition += header.Length;
+                        if (id > 0)
+                        {
+                            startPosition = fileLength - availableBytes - header.Length - chunkLength;
+
+                            if (startPosition + header.Length + chunkLength == fileLength)
+                                startPosition += header.Length;
+                        }
+
+                        chunks.Add(new ChunkReadInfo(id, startPosition, chunkLength));
+                        id++;
                     }
-
-                    chunks.Add(new ChunkReadInfo(id, startPosition, chunkLength));
-                    id++;
                 }
-            }
 
-            return new ChunksInfo(chunks);
+                return new ChunksInfo(chunks);
+            }
+            catch (Exception ex)
+            {
+                throw new SplitterException($"Errors occurred while splitting the file {inFile} for decompression", ex);
+            }
         }
 
         private List<byte> GetChunk(BinaryReader reader, byte[] header, int chunkSize, ref long availableBytes)

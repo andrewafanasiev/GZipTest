@@ -101,11 +101,12 @@ namespace GZipTest
         /// Errors occurred while the queue was running
         /// </summary>
         /// <returns>Result of checking</returns>
-        public bool IsErrorExist()
+        public bool IsErrorExist(out List<Exception> errors)
         {
             lock (_lockExObj)
             {
-                return _exceptions.Any();
+                errors = _exceptions;
+                return errors.Any();
             }
         }
 
