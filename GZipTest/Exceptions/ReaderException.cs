@@ -7,8 +7,8 @@ namespace GZipTest.Exceptions
     /// </summary>
     public class ReaderException : Exception
     {
-        public ReaderException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+        public ReaderException(string message) : base(message) { }
+
+        public ReaderException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

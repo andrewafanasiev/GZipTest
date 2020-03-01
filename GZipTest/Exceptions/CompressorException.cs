@@ -7,6 +7,8 @@ namespace GZipTest.Exceptions
     /// </summary>
     public class CompressorException : Exception
     {
+        public CompressorException(string message) : base(message) { }
+
         public CompressorException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

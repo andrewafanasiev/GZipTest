@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using GZipTest.Dtos;
+using GZipTest.Exceptions;
 using GZipTest.Interfaces;
 using Moq;
 using NUnit.Framework;
@@ -18,7 +19,7 @@ namespace GZipTest.Tests
         public void TaskReturnsErrorIfWriterFails()
         {
             var chunkWriterMock = new Mock<IChunkWriter>();
-            chunkWriterMock.Setup(x => x.WriteToFile(It.IsAny<byte[]>())).Throws(new Exception("An unexpected error occurred"));
+            chunkWriterMock.Setup(x => x.WriteToFile(It.IsAny<byte[]>())).Throws(new WriterException("An unexpected error occurred"));
 
             using (var writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
             {
@@ -26,7 +27,8 @@ namespace GZipTest.Tests
 
                 Thread.Sleep(100);
 
-                Assert.IsTrue(writerTask.IsErrorExist());
+                Assert.IsTrue(writerTask.IsErrorExist(out Exception exception));
+                Assert.IsInstanceOf<WriterException>(exception);
             }
         }
 
@@ -42,7 +44,7 @@ namespace GZipTest.Tests
 
                 Thread.Sleep(100);
 
-                Assert.IsTrue(writerTask.IsErrorExist());
+                Assert.IsTrue(writerTask.IsErrorExist(out Exception exception));
             }
         }
 
@@ -74,8 +76,9 @@ namespace GZipTest.Tests
                 Thread.Sleep(100);
 
                 chunkWriterMock.Verify(x => x.WriteToFile(It.IsAny<byte[]>()), Times.Exactly(3));
-                Assert.IsFalse(writerTask.IsErrorExist());
+                Assert.IsFalse(writerTask.IsErrorExist(out Exception exception));
                 Assert.IsFalse(writerTask.IsActive());
+                Assert.IsNull(exception);
             }
         }
     }

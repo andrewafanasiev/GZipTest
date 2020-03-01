@@ -7,6 +7,8 @@ namespace GZipTest.Exceptions
     /// </summary>
     public class WriterException : Exception
     {
+        public WriterException(string message) : base(message) { }
+
         public WriterException(string message, Exception innerException) : base(message, innerException) { }
     }
 }
