@@ -5,6 +5,7 @@ using GZipTest.Factories;
 using GZipTest.Interfaces;
 using GZipTest.IO;
 using GZipTest.Validation;
+using NLog;
 
 namespace GZipTest
 {
@@ -12,10 +13,11 @@ namespace GZipTest
     {
         static void Main(string[] args)
         {
+            var argsValidator = new ArgsValidator();
+            var logger = LogManager.GetCurrentClassLogger();
+
             try
             {
-                var argsValidator = new ArgsValidator();
-
                 if (argsValidator.IsArgsValid(args, out string validationMessage))
                 {
                     string actionType = args[0], inFile = args[1], outFile = args[2];
@@ -25,11 +27,18 @@ namespace GZipTest
                     var stopWatch = new Stopwatch();
 
                     stopWatch.Start();
-                    bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize, out List<Exception> errors);
+                    bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize, out List<Exception> exceptions);
                     stopWatch.Stop();
 
-                    if (isOpSuccess) IOManager.OpSuccess(stopWatch.Elapsed.TotalSeconds);
-                    else IOManager.OpError(errors);
+                    if (isOpSuccess)
+                    {
+                        IOManager.OpSuccess(stopWatch.Elapsed.TotalSeconds);
+                    }
+                    else
+                    {
+                        foreach (var ex in exceptions) logger.Error(ex);
+                        IOManager.OpError(exceptions);
+                    }
                 }
                 else
                 {
@@ -38,6 +47,7 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
+                logger.Error(ex);
                 IOManager.OpError(ex);
             }
 

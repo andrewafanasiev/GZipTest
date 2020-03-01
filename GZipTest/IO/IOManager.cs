@@ -31,23 +31,10 @@ namespace GZipTest.IO
         {
             if(errors == null) throw new InvalidDataException("Errors cannot be nullable");
 
-            var knownExceptions = errors.Where(x => KnownExceptionTypes.Contains(x.GetType())).ToList();
-
-            if (knownExceptions.Any())
-            {
-                Console.WriteLine("Errors occurred during execution. List:");
-
-                for (int i = 0; i < knownExceptions.Count; i++)
-                {
-                    Console.WriteLine($"{i+1}. {knownExceptions[i].Message}");
-                }
-
-                Console.WriteLine("See logs for details");
-            }
-            else
-            {
-                Console.WriteLine("An unexpected error occurred while running the application. See logs for details");
-            }
+            var knownException = errors.FirstOrDefault(x => KnownExceptionTypes.Contains(x.GetType()));
+            Console.WriteLine(knownException != null
+                ? $"{knownException.Message}. See logs for details"
+                : "An unexpected error occurred while running the application. See logs for details");
         }
 
         public static void OpError(Exception error)
