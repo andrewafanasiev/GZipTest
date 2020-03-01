@@ -11,9 +11,9 @@ namespace GZipTest.Helpers
         /// Thread state conversion to most useful values
         /// </summary>
         /// <returns>Returns one of the four possible values: Unstarted, Running, WaitSleepJoin, and Stopped</returns>
-        public static ThreadState GetSimpleThreadState(this Thread thread)
+        public static ThreadState GetSimpleThreadState(this ThreadState threadState)
         {
-            return thread.ThreadState & (ThreadState.Unstarted | ThreadState.WaitSleepJoin | ThreadState.Stopped);
+            return threadState & (ThreadState.Unstarted | ThreadState.WaitSleepJoin | ThreadState.Stopped);
         }
     }
 }

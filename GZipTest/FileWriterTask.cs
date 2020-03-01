@@ -85,7 +85,7 @@ namespace GZipTest
         {
             lock (_lockChunksObj)
             {
-                return _chunks.Any() || _thread.GetSimpleThreadState() == ThreadState.Running;
+                return _chunks.Any() || _thread.ThreadState.GetSimpleThreadState() == ThreadState.Running;
             }
         }
 
@@ -100,7 +100,7 @@ namespace GZipTest
 
         public void Dispose()
         {
-            if (_thread.GetSimpleThreadState() != ThreadState.Unstarted)
+            if (_thread.ThreadState.GetSimpleThreadState() != ThreadState.Unstarted)
             {
                 AddChunk(DummyId, null);
                 _thread.Join();

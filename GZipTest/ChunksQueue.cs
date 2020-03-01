@@ -93,7 +93,7 @@ namespace GZipTest
             lock(_lockQueueObj)
             {
                 return _chunks.Any() || _threads.Any(thread =>
-                           thread.GetSimpleThreadState() == ThreadState.Running);
+                           thread.ThreadState.GetSimpleThreadState() == ThreadState.Running);
             }
         }
 
@@ -114,7 +114,7 @@ namespace GZipTest
             _threads.ForEach(thread => EnqueueChunk(null));
             _threads.ForEach(thread =>
             {
-                if (thread.GetSimpleThreadState() != ThreadState.Unstarted) thread.Join();
+                if (thread.ThreadState.GetSimpleThreadState() != ThreadState.Unstarted) thread.Join();
             });
         }
     }
