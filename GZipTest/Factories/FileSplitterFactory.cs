@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using GZipTest.Interfaces;
+using GZipTest.IO;
 
-namespace GZipTest
+namespace GZipTest.Factories
 {
     public class FileSplitterFactory : IFileSplitterFactory
     {

@@ -5,16 +5,16 @@ using System.Text;
 using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.IO
 {
     /// <summary>
     /// Read data from file
     /// </summary>
-    public class FileReader : ISourceReader
+    public class FileChunkReader : ISourceReader
     {
         private readonly string _fileName;
 
-        public FileReader(string fileName)
+        public FileChunkReader(string fileName)
         {
             _fileName = fileName;
         }

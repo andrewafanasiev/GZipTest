@@ -2,7 +2,7 @@
 using System.Linq;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.Validation
 {
     /// <summary>
     /// Parameters validation

@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.Compression
 {
     public class GZipDecompress : IGZipCompressor
     {

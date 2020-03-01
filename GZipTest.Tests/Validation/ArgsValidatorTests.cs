@@ -1,7 +1,8 @@
 ﻿using GZipTest.Interfaces;
+using GZipTest.Validation;
 using NUnit.Framework;
 
-namespace GZipTest.Tests
+namespace GZipTest.Tests.Validation
 {
     [TestFixture]
     public class ArgsValidatorTests

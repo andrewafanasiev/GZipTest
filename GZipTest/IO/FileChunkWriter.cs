@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.IO
 {
     /// <summary>
     /// Writing data to file

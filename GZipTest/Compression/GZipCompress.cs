@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Text;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.Compression
 {
     public class GZipCompress : IGZipCompressor
     {

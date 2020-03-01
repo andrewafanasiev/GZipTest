@@ -1,8 +1,10 @@
 ﻿using System.IO;
+using GZipTest.Compression;
+using GZipTest.Factories;
 using GZipTest.Interfaces;
 using NUnit.Framework;
 
-namespace GZipTest.Tests
+namespace GZipTest.Tests.Factories
 {
     [TestFixture]
     public class CompressorFactoryTests

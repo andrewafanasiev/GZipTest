@@ -4,7 +4,7 @@ using System.IO;
 using GZipTest.Dtos;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.IO
 {
     public class DecompressionFileSplitter : IFileSplitter
     {

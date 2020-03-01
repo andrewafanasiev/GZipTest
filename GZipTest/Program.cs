@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using GZipTest.Factories;
 using GZipTest.Interfaces;
+using GZipTest.IO;
+using GZipTest.Validation;
 
 namespace GZipTest
 {
@@ -16,7 +19,7 @@ namespace GZipTest
                 {
                     string actionType = args[0], inFile = args[1], outFile = args[2];
                     int chunkSize = Environment.SystemPageSize * 1024;
-                    var gzipManager = new GZipManager(inFile, new FileReader(inFile), new FileChunkWriter(outFile),
+                    var gzipManager = new GZipManager(inFile, new FileChunkReader(inFile), new FileChunkWriter(outFile),
                         new FileSplitterFactory(), new CompressorFactory(), new TaskFactory());
                     var stopWatch = new Stopwatch();
 

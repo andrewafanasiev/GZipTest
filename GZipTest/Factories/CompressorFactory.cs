@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using GZipTest.Compression;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.Factories
 {
     public class CompressorFactory : ICompressorFactory
     {

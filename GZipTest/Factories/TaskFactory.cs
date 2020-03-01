@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GZipTest.Interfaces;
 
-namespace GZipTest
+namespace GZipTest.Factories
 {
     public class TaskFactory : ITaskFactory
     {
