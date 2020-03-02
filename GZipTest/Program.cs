@@ -11,7 +11,7 @@ namespace GZipTest
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             var argsValidator = new ArgsValidator();
             var logger = LogManager.GetCurrentClassLogger();
@@ -33,27 +33,25 @@ namespace GZipTest
                     if (isOpSuccess)
                     {
                         IOManager.OpSuccess(stopWatch.Elapsed.TotalSeconds);
+                        return 0;
                     }
-                    else
-                    {
-                        foreach (var ex in exceptions) logger.Error(ex);
-                        IOManager.OpError(exceptions);
-                    }
+
+                    foreach (var ex in exceptions) logger.Error(ex);
+                    IOManager.OpError(exceptions);
+
+                    return 1;
                 }
-                else
-                {
-                    IOManager.ValidationError(validationMessage);
-                }
+
+                IOManager.ValidationError(validationMessage);
+                return 1;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 IOManager.OpError(ex);
-            }
 
-            #if DEBUG
-            Console.ReadLine();
-            #endif
+                return 1;
+            }
         }
     }
 }
