@@ -86,7 +86,7 @@ namespace GZipTest.Tests
         }
 
         [Test]
-        public void IsErrorExistReturnsFalseIfQueueAndWriterTaskFails()
+        public void IsErrorExistReturnsFalseIfQueueAndWriterTaskSuccess()
         {
             _chunksQueueMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(false);
             _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(false);
