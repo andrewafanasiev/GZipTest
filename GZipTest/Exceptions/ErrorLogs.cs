@@ -31,10 +31,14 @@ namespace GZipTest.Exceptions
         /// <returns>Result of checking</returns>
         public bool IsErrorExist(out List<Exception> errors)
         {
+            errors = null;
+
             lock (_lockExObj)
             {
+                if (!_exceptions.Any()) return false;
+
                 errors = _exceptions;
-                return errors.Any();
+                return true;
             }
         }
     }
