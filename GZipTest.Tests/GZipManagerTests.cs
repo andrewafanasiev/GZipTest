@@ -21,6 +21,7 @@ namespace GZipTest.Tests
         private Mock<IWriterTask> _writerTaskMock;
         private Mock<IFileSplitter> _fileSplitterMock;
         private Mock<IErrorLogs> _errorLogsMock;
+        private List<Exception> _exceptions;
 
         [SetUp]
         public void Init()
@@ -36,6 +37,7 @@ namespace GZipTest.Tests
             _chunksReaderMock = new Mock<IChunksReader>();
             _writerTaskMock = new Mock<IWriterTask>();
             _fileSplitterMock = new Mock<IFileSplitter>();
+            _exceptions = null;
         }
 
         [Test]
@@ -97,6 +99,7 @@ namespace GZipTest.Tests
                 {
                     new ChunkReadInfo(0, 0, 1),
                 }));
+            _errorLogsMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(true);
             _taskFactoryMock.Setup(x => x.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>(), _errorLogsMock.Object))
                 .Returns(_writerTaskMock.Object);
             _taskFactoryMock.Setup(x => x.CreateChunksReader(It.IsAny<int>(), It.IsAny<ISourceReader>(),
