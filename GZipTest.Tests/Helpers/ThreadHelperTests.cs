@@ -16,7 +16,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void AbortedConvertsToRunningThreadState()
         {
-            var sts = ThreadState.Aborted.GetSimpleThreadState();
+            ThreadState sts = ThreadState.Aborted.GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.Running, sts);
         }
@@ -24,7 +24,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void UnstartedThreadStateRemainsUnchanged()
         {
-            var sts = (ThreadState.Background | ThreadState.Unstarted).GetSimpleThreadState();
+            ThreadState sts = (ThreadState.Background | ThreadState.Unstarted).GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.Unstarted, sts);
         }
@@ -32,7 +32,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void SuspendedConvertsToRunningThreadState()
         {
-            var sts = ThreadState.Suspended.GetSimpleThreadState();
+            ThreadState sts = ThreadState.Suspended.GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.Running, sts);
         }
@@ -40,7 +40,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void StoppedThreadStateRemainsUnchanged()
         {
-            var sts = ThreadState.Stopped.GetSimpleThreadState();
+            ThreadState sts = ThreadState.Stopped.GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.Stopped, sts);
         }
@@ -48,7 +48,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void WaitSleepJoinThreadStateRemainsUnchanged()
         {
-            var sts = ThreadState.WaitSleepJoin.GetSimpleThreadState();
+            ThreadState sts = ThreadState.WaitSleepJoin.GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.WaitSleepJoin, sts);
         }
@@ -56,7 +56,7 @@ namespace GZipTest.Tests.Helpers
         [Test]
         public void RunningThreadStateRemainsUnchanged()
         {
-            var sts = ThreadState.Running.GetSimpleThreadState();
+            ThreadState sts = ThreadState.Running.GetSimpleThreadState();
 
             Assert.AreEqual(ThreadState.Running, sts);
         }

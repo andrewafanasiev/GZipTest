@@ -43,7 +43,7 @@ namespace GZipTest.IO
         {
             if(errors == null) throw new InvalidDataException("Errors cannot be nullable");
 
-            var knownException = errors.FirstOrDefault(x => KnownExceptionTypes.Contains(x.GetType()));
+            Exception knownException = errors.FirstOrDefault(x => KnownExceptionTypes.Contains(x.GetType()));
             Console.WriteLine(knownException != null
                 ? $"{knownException.Message}. See logs for details"
                 : "An unexpected error occurred while running the application. See logs for details");

@@ -13,8 +13,8 @@ namespace GZipTest
     {
         static int Main(string[] args)
         {
-            var argsValidator = new ArgsValidator();
-            var logger = LogManager.GetCurrentClassLogger();
+            ArgsValidator argsValidator = new ArgsValidator();
+            Logger logger = LogManager.GetCurrentClassLogger();
 
             try
             {
@@ -22,9 +22,9 @@ namespace GZipTest
                 {
                     string actionType = args[0], inFile = args[1], outFile = args[2];
                     int chunkSize = Environment.SystemPageSize * 1024;
-                    var gzipManager = new GZipManager(inFile, new FileChunkReader(inFile), new FileChunkWriter(outFile),
+                    GZipManager gzipManager = new GZipManager(inFile, new FileChunkReader(inFile), new FileChunkWriter(outFile),
                         new FileSplitterFactory(), new CompressorFactory(), new TaskFactory());
-                    var stopWatch = new Stopwatch();
+                    Stopwatch stopWatch = new Stopwatch();
 
                     stopWatch.Start();
                     bool isOpSuccess = gzipManager.Execute(actionType, Environment.ProcessorCount, chunkSize, out List<Exception> exceptions);
@@ -36,7 +36,7 @@ namespace GZipTest
                         return 0;
                     }
 
-                    foreach (var ex in exceptions) logger.Error(ex);
+                    foreach (Exception ex in exceptions) logger.Error(ex);
                     IOManager.OpError(exceptions);
 
                     return 1;

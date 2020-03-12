@@ -17,11 +17,11 @@ namespace GZipTest.Compression
         {
             try
             {
-                using (var output = new MemoryStream())
+                using (MemoryStream output = new MemoryStream())
                 {
-                    using (var input = new MemoryStream(bytes))
+                    using (MemoryStream input = new MemoryStream(bytes))
                     {
-                        using (var decompressStream = new GZipStream(input, CompressionMode.Decompress))
+                        using (GZipStream decompressStream = new GZipStream(input, CompressionMode.Decompress))
                         {
                             decompressStream.CopyTo(output);
                         }

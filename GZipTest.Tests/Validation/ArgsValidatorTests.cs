@@ -17,7 +17,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void ValidationFailsOnArgsCount()
         {
-            var argsValidator = new ArgsValidator();
+            ArgsValidator argsValidator = new ArgsValidator();
 
             Assert.IsFalse(argsValidator.IsArgsValid(null, out string message));
             Assert.IsTrue(message.Contains("Parameters are expected:\n1. Action. Possible values"));
@@ -26,7 +26,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void ValidationFailsOnUnsupportedActionType()
         {
-            var args = new[] { "myActionType", "filePath1", "filePath2" };
+            string[] args = { "myActionType", "filePath1", "filePath2" };
 
             Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
             Assert.IsTrue(message.Contains("Unsupported action type"));
@@ -35,7 +35,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void ValidationFailsOnInvalidInputFileName()
         {
-            var args = new[] { Constants.Compress, "C:\\f|ile.zip", "filePath2" };
+            string[] args = { Constants.Compress, "C:\\f|ile.zip", "filePath2" };
 
             Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
             Assert.IsTrue(message.Contains("Input file path invalid"));
@@ -44,7 +44,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void ValidationFailsOnInvalidOutputFileName()
         {
-            var args = new[] { Constants.Compress, "C:\\file1.zip", "C:\\fi|le2.zip.gz" };
+            string[] args = { Constants.Compress, "C:\\file1.zip", "C:\\fi|le2.zip.gz" };
 
             Assert.IsFalse(_argsValidator.IsArgsValid(args, out string message));
             Assert.IsTrue(message.Contains("Output file path invalid"));
@@ -53,7 +53,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void ValidArgsCount()
         {
-            var args = new[] { "1", "2", "3" };
+            string[] args = { "1", "2", "3" };
 
             Assert.IsTrue(_argsValidator.IsArgsCountValid(args));
         }
@@ -61,7 +61,7 @@ namespace GZipTest.Tests.Validation
         [Test]
         public void NotValidArgsCount()
         {
-            var args = new[] { "1" };
+            string[] args = { "1" };
 
             Assert.IsFalse(_argsValidator.IsArgsCountValid(args));
         }

@@ -19,7 +19,7 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateGZipCompressObj()
         {
-            var gzipCompressor = _compressorFactory.Create(Constants.Compress);
+            IGZipCompressor gzipCompressor = _compressorFactory.Create(Constants.Compress);
 
             Assert.IsAssignableFrom<GZipCompress>(gzipCompressor);
         }
@@ -27,7 +27,7 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateGZipDecompressObj()
         {
-            var gzipCompressor = _compressorFactory.Create(Constants.Decompress);
+            IGZipCompressor gzipCompressor = _compressorFactory.Create(Constants.Decompress);
 
             Assert.IsAssignableFrom<GZipDecompress>(gzipCompressor);
         }

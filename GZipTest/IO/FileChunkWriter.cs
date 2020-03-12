@@ -27,7 +27,7 @@ namespace GZipTest.IO
         {
             try
             {
-                using (var writer = new BinaryWriter(File.Open(_outFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
+                using (BinaryWriter writer = new BinaryWriter(File.Open(_outFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
                 {
                     writer.BaseStream.Seek(0, SeekOrigin.End);
                     writer.Write(bytes);
