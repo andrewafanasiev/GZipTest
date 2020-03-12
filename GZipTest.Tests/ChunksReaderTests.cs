@@ -34,7 +34,7 @@ namespace GZipTest.Tests
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
             using (ChunksReader chunksReader = new ChunksReader(Environment.ProcessorCount, _fileReaderMock.Object,
-                _gzipCompressMock.Object, _fileWriterTaskMock.Object))
+                _gzipCompressMock.Object, _fileWriterTaskMock.Object, It.IsAny<IErrorLogs>()))
             {
                 chunksReader.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
 
@@ -42,8 +42,6 @@ namespace GZipTest.Tests
 
                 _fileReaderMock.Verify(x => x.GetChunkBytes(It.IsAny<ChunkReadInfo>()), Times.Once);
                 _fileWriterTaskMock.Verify(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()), Times.Never);
-                Assert.IsTrue(chunksReader.IsErrorExist(out List<Exception> exceptions));
-                Assert.IsTrue(exceptions.Any(x => x.GetType() == typeof(CompressorException)));
             }
         }
 
@@ -55,7 +53,7 @@ namespace GZipTest.Tests
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
             using (ChunksReader chunksReader = new ChunksReader(Environment.ProcessorCount, _fileReaderMock.Object,
-                _gzipCompressMock.Object, _fileWriterTaskMock.Object))
+                _gzipCompressMock.Object, _fileWriterTaskMock.Object, It.IsAny<IErrorLogs>()))
             {
                 chunksReader.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
 
@@ -63,8 +61,6 @@ namespace GZipTest.Tests
 
                 _fileReaderMock.Verify(x => x.GetChunkBytes(It.IsAny<ChunkReadInfo>()), Times.Once);
                 _gzipCompressMock.Verify(x => x.Execute(It.IsAny<byte[]>()), Times.Never);
-                Assert.IsTrue(chunksReader.IsErrorExist(out List<Exception> exceptions));
-                Assert.IsTrue(exceptions.Any(x => x.GetType() == typeof(ReaderException)));
             }
         }
 
@@ -76,14 +72,13 @@ namespace GZipTest.Tests
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
             using (ChunksReader chunksReader = new ChunksReader(Environment.ProcessorCount, _fileReaderMock.Object,
-                _gzipCompressMock.Object, _fileWriterTaskMock.Object))
+                _gzipCompressMock.Object, _fileWriterTaskMock.Object, It.IsAny<IErrorLogs>()))
             {
                 chunksReader.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
 
                 Thread.Sleep(100);
 
                 _fileWriterTaskMock.Verify(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()), Times.Once);
-                Assert.IsFalse(chunksReader.IsErrorExist(out List<Exception> exceptions));
             }
         }
 
@@ -91,7 +86,7 @@ namespace GZipTest.Tests
         public void QueueIsNotActiveIfNoChunks()
         {
             using (ChunksReader chunksReader = new ChunksReader(Environment.ProcessorCount, _fileReaderMock.Object,
-                _gzipCompressMock.Object, _fileWriterTaskMock.Object))
+                _gzipCompressMock.Object, _fileWriterTaskMock.Object, It.IsAny<IErrorLogs>()))
             {
                 Assert.IsFalse(chunksReader.IsActive());
             }

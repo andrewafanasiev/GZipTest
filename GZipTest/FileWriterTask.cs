@@ -15,17 +15,18 @@ namespace GZipTest
     public class FileWriterTask : IWriterTask, IDisposable
     {
         private readonly Thread _thread;
-        private volatile Exception _exception;
         private readonly Dictionary<int, ChunkWriteInfo> _chunks = new Dictionary<int, ChunkWriteInfo>();
         private readonly IChunkWriter _chunkWriter;
+        private readonly IErrorLogs _errorLogs;
         private readonly object _lockChunksObj = new object();
         private const int DummyId = -1;
         private readonly int _chunksCount;
 
-        public FileWriterTask(int chunksCount, IChunkWriter chunkWriter)
+        public FileWriterTask(int chunksCount, IChunkWriter chunkWriter, IErrorLogs errorLogs)
         {
             _chunksCount = chunksCount;
             _chunkWriter = chunkWriter;
+            _errorLogs = errorLogs;
             _thread = new Thread(Consume) {IsBackground = true, Name = "Background worker (file writer)" };
             _thread.Start();
         }
@@ -73,7 +74,7 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
-                _exception = ex;
+                _errorLogs.Add(ex);
             }
         }
 
@@ -87,17 +88,6 @@ namespace GZipTest
             {
                 return _chunks.Any() || _thread.ThreadState.GetSimpleThreadState() == ThreadState.Running;
             }
-        }
-
-        /// <summary>
-        /// Is error occurred while the task was running
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        public bool IsErrorExist(out Exception error)
-        {
-            error = _exception;
-
-            return error != null;
         }
 
         public void Dispose()

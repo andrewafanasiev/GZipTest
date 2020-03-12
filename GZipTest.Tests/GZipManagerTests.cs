@@ -20,8 +20,7 @@ namespace GZipTest.Tests
         private Mock<IChunksReader> _chunksReaderMock;
         private Mock<IWriterTask> _writerTaskMock;
         private Mock<IFileSplitter> _fileSplitterMock;
-        private List<Exception> _exceptions;
-        private Exception _exception;
+        private Mock<IErrorLogs> _errorLogsMock;
 
         [SetUp]
         public void Init()
@@ -31,13 +30,12 @@ namespace GZipTest.Tests
             _splitterFactoryMok = new Mock<IFileSplitterFactory>();
             _compressorFactoryMock = new Mock<ICompressorFactory>();
             _taskFactoryMock = new Mock<ITaskFactory>();
+            _errorLogsMock = new Mock<IErrorLogs>();
             _gZipManager = new GZipManager(It.IsAny<string>(), _sourceReaderMock.Object, _chunkWriterMock.Object,
-                _splitterFactoryMok.Object, _compressorFactoryMock.Object, _taskFactoryMock.Object);
+                _splitterFactoryMok.Object, _compressorFactoryMock.Object, _taskFactoryMock.Object, _errorLogsMock.Object);
             _chunksReaderMock = new Mock<IChunksReader>();
             _writerTaskMock = new Mock<IWriterTask>();
             _fileSplitterMock = new Mock<IFileSplitter>();
-            _exceptions = null;
-            _exception = null;
         }
 
         [Test]
@@ -68,33 +66,6 @@ namespace GZipTest.Tests
         }
 
         [Test]
-        public void IsErrorExistReturnsFalseIfQueueFails()
-        {
-            _chunksReaderMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(true);
-            _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(false);
-
-            Assert.IsTrue(_gZipManager.IsErrorExist(_chunksReaderMock.Object, _writerTaskMock.Object, out List<Exception> errors));
-        }
-
-        [Test]
-        public void IsErrorExistReturnsFalseIfWriterTaskFails()
-        {
-            _chunksReaderMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(false);
-            _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(true);
-
-            Assert.IsTrue(_gZipManager.IsErrorExist(_chunksReaderMock.Object, _writerTaskMock.Object, out List<Exception> errors));
-        }
-
-        [Test]
-        public void IsErrorExistReturnsFalseIfQueueAndWriterTaskSuccess()
-        {
-            _chunksReaderMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(false);
-            _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(false);
-
-            Assert.IsFalse(_gZipManager.IsErrorExist(_chunksReaderMock.Object, _writerTaskMock.Object, out List<Exception> errors));
-        }
-
-        [Test]
         public void ExecuteReturnsTrueIfAllChunksAreProcessedSuccessfully()
         {
             _fileSplitterMock.Setup(x => x.GetChunks(It.IsAny<string>(), It.IsAny<int>())).Returns(new ChunksInfo(
@@ -103,13 +74,11 @@ namespace GZipTest.Tests
                     new ChunkReadInfo(0, 0, 1),
                     new ChunkReadInfo(1, 1, 2),
                 }));
-            _taskFactoryMock.Setup(x => x.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>()))
+            _taskFactoryMock.Setup(x => x.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>(), _errorLogsMock.Object))
                 .Returns(_writerTaskMock.Object);
             _taskFactoryMock.Setup(x => x.CreateChunksReader(It.IsAny<int>(), It.IsAny<ISourceReader>(),
-                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>())).Returns(_chunksReaderMock.Object);
+                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>(), _errorLogsMock.Object)).Returns(_chunksReaderMock.Object);
             _splitterFactoryMok.Setup(x => x.Create(It.IsAny<string>())).Returns(_fileSplitterMock.Object);
-            _chunksReaderMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(false);
-            _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(false);
             _chunksReaderMock.Setup(x => x.IsActive()).Returns(false);
             _writerTaskMock.Setup(x => x.IsActive()).Returns(false);
 
@@ -128,13 +97,11 @@ namespace GZipTest.Tests
                 {
                     new ChunkReadInfo(0, 0, 1),
                 }));
-            _taskFactoryMock.Setup(x => x.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>()))
+            _taskFactoryMock.Setup(x => x.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>(), _errorLogsMock.Object))
                 .Returns(_writerTaskMock.Object);
             _taskFactoryMock.Setup(x => x.CreateChunksReader(It.IsAny<int>(), It.IsAny<ISourceReader>(),
-                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>())).Returns(_chunksReaderMock.Object);
+                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>(), _errorLogsMock.Object)).Returns(_chunksReaderMock.Object);
             _splitterFactoryMok.Setup(x => x.Create(It.IsAny<string>())).Returns(_fileSplitterMock.Object);
-            _chunksReaderMock.Setup(x => x.IsErrorExist(out _exceptions)).Returns(false);
-            _writerTaskMock.Setup(x => x.IsErrorExist(out _exception)).Returns(true);
             _chunksReaderMock.Setup(x => x.IsActive()).Returns(false);
             _writerTaskMock.Setup(x => x.IsActive()).Returns(false);
 

@@ -14,10 +14,11 @@ namespace GZipTest.Factories
         /// <param name="reader">Reader from source</param>
         /// <param name="compressor">Interface for compression, decompression</param>
         /// <param name="writerTask">Task for write data</param>
+        /// <param name="errorLogs">Execution error logs</param>
         /// <returns>Chunks queue</returns>
-        public IChunksReader CreateChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
+        public IChunksReader CreateChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask, IErrorLogs errorLogs)
         {
-            return new ChunksReader(workersCount, reader, compressor, writerTask);
+            return new ChunksReader(workersCount, reader, compressor, writerTask, errorLogs);
         }
 
         /// <summary>
@@ -25,10 +26,11 @@ namespace GZipTest.Factories
         /// </summary>
         /// <param name="chunksCount">Count of chunks for write</param>
         /// <param name="chunkWriter">Writer</param>
+        /// <param name="errorLogs">Execution error logs</param>
         /// <returns>Writer task</returns>
-        public IWriterTask CreatWriterTask(int chunksCount, IChunkWriter chunkWriter)
+        public IWriterTask CreatWriterTask(int chunksCount, IChunkWriter chunkWriter, IErrorLogs errorLogs)
         {
-            return new FileWriterTask(chunksCount, chunkWriter);
+            return new FileWriterTask(chunksCount, chunkWriter, errorLogs);
         }
     }
 }

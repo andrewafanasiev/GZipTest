@@ -17,9 +17,10 @@ namespace GZipTest
         private readonly ITaskFactory _taskFactory;
         private readonly ISourceReader _sourceReader;
         private readonly IChunkWriter _chunkWriter;
+        private readonly IErrorLogs _errorLogs;
 
         public GZipManager(string inFile, ISourceReader reader, IChunkWriter chunkWriter,
-            IFileSplitterFactory fileSplitterFactory, ICompressorFactory compressorFactory, ITaskFactory taskFactory)
+            IFileSplitterFactory fileSplitterFactory, ICompressorFactory compressorFactory, ITaskFactory taskFactory, IErrorLogs errorLogs)
         {
             _chunkWriter = chunkWriter;
             _sourceReader = reader;
@@ -27,6 +28,7 @@ namespace GZipTest
             _inFile = inFile;
             _fileSplitterFactory = fileSplitterFactory;
             _compressorFactory = compressorFactory;
+            _errorLogs = errorLogs;
         }
 
         /// <summary>
@@ -41,9 +43,9 @@ namespace GZipTest
         {
             ChunksInfo chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
-            using (IWriterTask fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter))
+            using (IWriterTask fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter, _errorLogs))
             using (IChunksReader chunksReader = _taskFactory.CreateChunksReader(workersCount, _sourceReader,
-                _compressorFactory.Create(actionType), fileWriterTask))
+                _compressorFactory.Create(actionType), fileWriterTask, _errorLogs))
             {
                 foreach (ChunkReadInfo chunkInfo in chunkInfos.Chunks)
                 {
@@ -52,11 +54,11 @@ namespace GZipTest
 
                 while (true)
                 {
-                    if (!IsErrorExist(chunksReader, fileWriterTask, out List<Exception> exceptions))
+                    if (!_errorLogs.IsErrorExist(out List<Exception> exceptions))
                     {
                         if (!IsActiveOp(chunksReader, fileWriterTask))
                         {
-                            return !IsErrorExist(chunksReader, fileWriterTask, out errors);
+                            return !_errorLogs.IsErrorExist(out errors);
                         }
 
                         continue;
@@ -75,27 +77,6 @@ namespace GZipTest
         public bool IsActiveOp(IChunksReader chunksReader, IWriterTask writerTask)
         {
             return chunksReader.IsActive() || writerTask.IsActive();
-        }
-
-        /// <summary>
-        /// An error occurred during the execution
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        public bool IsErrorExist(IChunksReader chunksReader, IWriterTask writerTask, out List<Exception> errors)
-        {
-            if (chunksReader.IsErrorExist(out List<Exception> queueErrors) |
-                writerTask.IsErrorExist(out Exception writerError))
-            {
-                errors = new List<Exception>();
-
-                if (queueErrors != null) errors = queueErrors;
-                if (writerError != null) errors.Add(writerError);
-
-                return true;
-            }
-
-            errors = null;
-            return false;
         }
     }
 }

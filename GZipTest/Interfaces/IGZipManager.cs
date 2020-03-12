@@ -23,11 +23,5 @@ namespace GZipTest.Interfaces
         /// </summary>
         /// <returns>Result of checking</returns>
         bool IsActiveOp(IChunksReader chunksReader, IWriterTask writerTask);
-
-        /// <summary>
-        /// An error occurred during the execution
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        bool IsErrorExist(IChunksReader chunksReader, IWriterTask writerTask, out List<Exception> errors);
     }
 }

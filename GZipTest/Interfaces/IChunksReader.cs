@@ -20,11 +20,5 @@ namespace GZipTest.Interfaces
         /// </summary>
         /// <returns>Result of checking</returns>
         bool IsActive();
-
-        /// <summary>
-        /// Errors occurred while the queue was running
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        bool IsErrorExist(out List<Exception> errors);
     }
 }
