@@ -22,10 +22,10 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateChunksQueueObj()
         {
-            IChunksQueue chunksQueue = _taskFactory.CreateChunksQueue(It.IsAny<int>(), It.IsAny<ISourceReader>(),
+            IChunksReader chunksReader = _taskFactory.CreateChunksReader(It.IsAny<int>(), It.IsAny<ISourceReader>(),
                 It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>());
 
-            Assert.IsInstanceOf<ChunksQueue>(chunksQueue);
+            Assert.IsInstanceOf<ChunksReader>(chunksReader);
         }
 
         [Test]

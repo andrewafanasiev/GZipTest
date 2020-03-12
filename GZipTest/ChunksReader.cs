@@ -11,7 +11,7 @@ namespace GZipTest
     /// <summary>
     /// Queue for parallel processing of chunks
     /// </summary>
-    public class ChunksQueue : IChunksQueue, IDisposable
+    public class ChunksReader : IChunksReader, IDisposable
     {
         private readonly List<Thread> _threads;
         private readonly List<Exception> _exceptions;
@@ -22,7 +22,7 @@ namespace GZipTest
         private readonly object _lockQueueObj = new object();
         private readonly object _lockExObj = new object();
 
-        public ChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
+        public ChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
         {
             _compressor = compressor;
             _fileReader = reader;

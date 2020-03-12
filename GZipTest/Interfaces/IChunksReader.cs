@@ -7,7 +7,7 @@ namespace GZipTest.Interfaces
     /// <summary>
     /// Queue for parallel processing of chunks
     /// </summary>
-    public interface IChunksQueue : IDisposable
+    public interface IChunksReader : IDisposable
     {
         /// <summary>
         /// Add a chunk to the queue

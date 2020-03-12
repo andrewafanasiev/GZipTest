@@ -22,12 +22,12 @@ namespace GZipTest.Interfaces
         /// Is operation active
         /// </summary>
         /// <returns>Result of checking</returns>
-        bool IsActiveOp(IChunksQueue chunksQueue, IWriterTask writerTask);
+        bool IsActiveOp(IChunksReader chunksReader, IWriterTask writerTask);
 
         /// <summary>
         /// An error occurred during the execution
         /// </summary>
         /// <returns>Result of checking</returns>
-        bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask, out List<Exception> errors);
+        bool IsErrorExist(IChunksReader chunksReader, IWriterTask writerTask, out List<Exception> errors);
     }
 }

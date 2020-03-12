@@ -15,9 +15,9 @@ namespace GZipTest.Factories
         /// <param name="compressor">Interface for compression, decompression</param>
         /// <param name="writerTask">Task for write data</param>
         /// <returns>Chunks queue</returns>
-        public IChunksQueue CreateChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
+        public IChunksReader CreateChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
         {
-            return new ChunksQueue(workersCount, reader, compressor, writerTask);
+            return new ChunksReader(workersCount, reader, compressor, writerTask);
         }
 
         /// <summary>

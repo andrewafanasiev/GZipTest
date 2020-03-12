@@ -14,7 +14,7 @@ namespace GZipTest.Interfaces
         /// <param name="compressor">Interface for compression, decompression</param>
         /// <param name="writerTask">Task for write data</param>
         /// <returns>Chunks queue</returns>
-        IChunksQueue CreateChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor,
+        IChunksReader CreateChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor,
             IWriterTask writerTask);
 
         /// <summary>

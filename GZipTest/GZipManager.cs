@@ -42,21 +42,21 @@ namespace GZipTest
             ChunksInfo chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
             using (IWriterTask fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter))
-            using (IChunksQueue chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader,
+            using (IChunksReader chunksReader = _taskFactory.CreateChunksReader(workersCount, _sourceReader,
                 _compressorFactory.Create(actionType), fileWriterTask))
             {
                 foreach (ChunkReadInfo chunkInfo in chunkInfos.Chunks)
                 {
-                    chunksQueue.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
+                    chunksReader.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
                 }
 
                 while (true)
                 {
-                    if (!IsErrorExist(chunksQueue, fileWriterTask, out List<Exception> exceptions))
+                    if (!IsErrorExist(chunksReader, fileWriterTask, out List<Exception> exceptions))
                     {
-                        if (!IsActiveOp(chunksQueue, fileWriterTask))
+                        if (!IsActiveOp(chunksReader, fileWriterTask))
                         {
-                            return !IsErrorExist(chunksQueue, fileWriterTask, out errors);
+                            return !IsErrorExist(chunksReader, fileWriterTask, out errors);
                         }
 
                         continue;
@@ -72,18 +72,18 @@ namespace GZipTest
         /// Is operation active
         /// </summary>
         /// <returns>Result of checking</returns>
-        public bool IsActiveOp(IChunksQueue chunksQueue, IWriterTask writerTask)
+        public bool IsActiveOp(IChunksReader chunksReader, IWriterTask writerTask)
         {
-            return chunksQueue.IsActive() || writerTask.IsActive();
+            return chunksReader.IsActive() || writerTask.IsActive();
         }
 
         /// <summary>
         /// An error occurred during the execution
         /// </summary>
         /// <returns>Result of checking</returns>
-        public bool IsErrorExist(IChunksQueue chunksQueue, IWriterTask writerTask, out List<Exception> errors)
+        public bool IsErrorExist(IChunksReader chunksReader, IWriterTask writerTask, out List<Exception> errors)
         {
-            if (chunksQueue.IsErrorExist(out List<Exception> queueErrors) |
+            if (chunksReader.IsErrorExist(out List<Exception> queueErrors) |
                 writerTask.IsErrorExist(out Exception writerError))
             {
                 errors = new List<Exception>();
