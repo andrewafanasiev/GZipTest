@@ -13,16 +13,18 @@ namespace GZipTest.Interfaces
         /// <param name="reader">Reader from source</param>
         /// <param name="compressor">Interface for compression, decompression</param>
         /// <param name="writerTask">Task for write data</param>
+        /// <param name="errorLogs">Execution error logs</param>
         /// <returns>Chunks queue</returns>
-        IChunksQueue CreateChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor,
-            IWriterTask writerTask);
+        IChunksReader CreateChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor,
+            IWriterTask writerTask, IErrorLogs errorLogs);
 
         /// <summary>
         /// Create task for writing chunks after compression, decompression
         /// </summary>
         /// <param name="chunksCount">Count of chunks for write</param>
         /// <param name="chunkWriter">Writer</param>
+        /// <param name="errorLogs">Execution error logs</param>
         /// <returns>Writer task</returns>
-        IWriterTask CreatWriterTask(int chunksCount, IChunkWriter chunkWriter);
+        IWriterTask CreatWriterTask(int chunksCount, IChunkWriter chunkWriter, IErrorLogs errorLogs);
     }
 }

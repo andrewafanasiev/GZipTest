@@ -11,23 +11,22 @@ namespace GZipTest
     /// <summary>
     /// Queue for parallel processing of chunks
     /// </summary>
-    public class ChunksQueue : IChunksQueue, IDisposable
+    public class ChunksReader : IChunksReader, IDisposable
     {
         private readonly List<Thread> _threads;
-        private readonly List<Exception> _exceptions;
         private readonly IGZipCompressor _compressor;
         private readonly IWriterTask _writerTask;
         private readonly ISourceReader _fileReader;
+        private readonly IErrorLogs _errorLogs;
         private readonly Queue<ChunkReadInfo> _chunks = new Queue<ChunkReadInfo>();
         private readonly object _lockQueueObj = new object();
-        private readonly object _lockExObj = new object();
 
-        public ChunksQueue(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask)
+        public ChunksReader(int workersCount, ISourceReader reader, IGZipCompressor compressor, IWriterTask writerTask, IErrorLogs errorLogs)
         {
             _compressor = compressor;
             _fileReader = reader;
             _writerTask = writerTask;
-            _exceptions = new List<Exception>();
+            _errorLogs = errorLogs;
             _threads = new List<Thread>();
 
             for (int i = 0; i < workersCount; ++i)
@@ -77,10 +76,7 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
-                lock (_lockExObj)
-                {
-                    _exceptions.Add(ex);
-                }
+                _errorLogs.Add(ex);
             }
         }
 
@@ -94,19 +90,6 @@ namespace GZipTest
             {
                 return _chunks.Any() || _threads.Any(thread =>
                            thread.ThreadState.GetSimpleThreadState() == ThreadState.Running);
-            }
-        }
-
-        /// <summary>
-        /// Errors occurred while the queue was running
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        public bool IsErrorExist(out List<Exception> errors)
-        {
-            lock (_lockExObj)
-            {
-                errors = _exceptions;
-                return errors.Any();
             }
         }
 

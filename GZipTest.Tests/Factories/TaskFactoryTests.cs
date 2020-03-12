@@ -22,16 +22,16 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateChunksQueueObj()
         {
-            IChunksQueue chunksQueue = _taskFactory.CreateChunksQueue(It.IsAny<int>(), It.IsAny<ISourceReader>(),
-                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>());
+            IChunksReader chunksReader = _taskFactory.CreateChunksReader(It.IsAny<int>(), It.IsAny<ISourceReader>(),
+                It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>(), It.IsAny<IErrorLogs>());
 
-            Assert.IsInstanceOf<ChunksQueue>(chunksQueue);
+            Assert.IsInstanceOf<ChunksReader>(chunksReader);
         }
 
         [Test]
         public void FactoryWillCreateFileWriterTaskObj()
         {
-            IWriterTask writerTask = _taskFactory.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>());
+            IWriterTask writerTask = _taskFactory.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>(), It.IsAny<IErrorLogs>());
 
             Assert.IsInstanceOf<FileWriterTask>(writerTask);
         }

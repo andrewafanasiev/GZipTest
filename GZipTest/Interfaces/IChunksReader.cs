@@ -7,7 +7,7 @@ namespace GZipTest.Interfaces
     /// <summary>
     /// Queue for parallel processing of chunks
     /// </summary>
-    public interface IChunksQueue : IDisposable
+    public interface IChunksReader : IDisposable
     {
         /// <summary>
         /// Add a chunk to the queue
@@ -20,11 +20,5 @@ namespace GZipTest.Interfaces
         /// </summary>
         /// <returns>Result of checking</returns>
         bool IsActive();
-
-        /// <summary>
-        /// Errors occurred while the queue was running
-        /// </summary>
-        /// <returns>Result of checking</returns>
-        bool IsErrorExist(out List<Exception> errors);
     }
 }
