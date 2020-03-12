@@ -19,9 +19,9 @@ namespace GZipTest.Compression
         {
             try
             {
-                using (var output = new MemoryStream())
+                using (MemoryStream output = new MemoryStream())
                 {
-                    using (var compressStream = new GZipStream(output, CompressionMode.Compress))
+                    using (GZipStream compressStream = new GZipStream(output, CompressionMode.Compress))
                     {
                         compressStream.Write(bytes, 0, bytes.Length);
                     }

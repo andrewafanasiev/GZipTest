@@ -32,7 +32,7 @@ namespace GZipTest
 
             for (int i = 0; i < workersCount; ++i)
             {
-                var thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker (chunks queue): {i}"};
+                Thread thread = new Thread(Consume) {IsBackground = true, Name = $"Background worker (chunks queue): {i}"};
 
                 _threads.Add(thread);
                 thread.Start();
@@ -71,7 +71,7 @@ namespace GZipTest
 
                     if (chunkReadInfo == null) return;
 
-                    var chunkWriteInfo = new ChunkWriteInfo(chunkReadInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkReadInfo)));
+                    ChunkWriteInfo chunkWriteInfo = new ChunkWriteInfo(chunkReadInfo.Id, _compressor.Execute(_fileReader.GetChunkBytes(chunkReadInfo)));
                     _writerTask.AddChunk(chunkReadInfo.Id, chunkWriteInfo);
                 }
             }

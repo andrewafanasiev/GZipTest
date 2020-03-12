@@ -29,7 +29,7 @@ namespace GZipTest.IO
         {
             try
             {
-                using (var reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (BinaryReader reader = new BinaryReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
                     reader.BaseStream.Seek(chunkReadInfo.Offset, SeekOrigin.Begin);
 

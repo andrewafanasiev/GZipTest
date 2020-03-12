@@ -22,7 +22,7 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateChunksQueueObj()
         {
-            var chunksQueue = _taskFactory.CreateChunksQueue(It.IsAny<int>(), It.IsAny<ISourceReader>(),
+            IChunksQueue chunksQueue = _taskFactory.CreateChunksQueue(It.IsAny<int>(), It.IsAny<ISourceReader>(),
                 It.IsAny<IGZipCompressor>(), It.IsAny<IWriterTask>());
 
             Assert.IsInstanceOf<ChunksQueue>(chunksQueue);
@@ -31,7 +31,7 @@ namespace GZipTest.Tests.Factories
         [Test]
         public void FactoryWillCreateFileWriterTaskObj()
         {
-            var writerTask = _taskFactory.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>());
+            IWriterTask writerTask = _taskFactory.CreatWriterTask(It.IsAny<int>(), It.IsAny<IChunkWriter>());
 
             Assert.IsInstanceOf<FileWriterTask>(writerTask);
         }

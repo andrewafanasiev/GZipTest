@@ -19,7 +19,7 @@ namespace GZipTest.IO
         {
             try
             {
-                var chunks = new List<ChunkReadInfo>();
+                List<ChunkReadInfo> chunks = new List<ChunkReadInfo>();
                 long fileLength = new FileInfo(inFile).Length;
                 long availableBytes = fileLength;
                 int offset = 0;

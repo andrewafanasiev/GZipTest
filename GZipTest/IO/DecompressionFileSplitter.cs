@@ -21,14 +21,14 @@ namespace GZipTest.IO
         {
             try
             {
-                var chunks = new List<ChunkReadInfo>();
+                List<ChunkReadInfo> chunks = new List<ChunkReadInfo>();
 
-                using (var reader = new BinaryReader(File.Open(inFile, FileMode.Open, FileAccess.Read)))
+                using (BinaryReader reader = new BinaryReader(File.Open(inFile, FileMode.Open, FileAccess.Read)))
                 {
                     long fileLength = new FileInfo(inFile).Length;
                     byte[] header = reader.ReadBytes(DefaultHeader.Length);
                     long availableBytes = fileLength - header.Length;
-                    var id = 0;
+                    int id = 0;
 
                     while (availableBytes > 0)
                     {
@@ -59,13 +59,13 @@ namespace GZipTest.IO
 
         private List<byte> GetChunk(BinaryReader reader, byte[] header, int chunkSize, ref long availableBytes)
         {
-            var headerMatchesCount = 0;
-            var chunk = new List<byte>(chunkSize);
+            int headerMatchesCount = 0;
+            List<byte> chunk = new List<byte>(chunkSize);
             chunk.AddRange(header);
 
             while (availableBytes > 0)
             {
-                var curByte = reader.ReadByte();
+                byte curByte = reader.ReadByte();
                 chunk.Add(curByte);
                 availableBytes--;
 

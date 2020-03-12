@@ -33,7 +33,7 @@ namespace GZipTest.Tests
             _gzipCompressMock.Setup(x => x.Execute(It.IsAny<byte[]>())).Throws(new CompressorException("An unexpected error occurred"));
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
-            using (var chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
+            using (ChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
                 _gzipCompressMock.Object, _fileWriterTaskMock.Object))
             {
                 chunksQueue.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
@@ -54,7 +54,7 @@ namespace GZipTest.Tests
             _gzipCompressMock.Setup(x => x.Execute(It.IsAny<byte[]>())).Returns(It.IsAny<byte[]>());
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
-            using (var chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
+            using (ChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
                 _gzipCompressMock.Object, _fileWriterTaskMock.Object))
             {
                 chunksQueue.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
@@ -75,7 +75,7 @@ namespace GZipTest.Tests
             _gzipCompressMock.Setup(x => x.Execute(It.IsAny<byte[]>())).Returns(It.IsAny<byte[]>());
             _fileWriterTaskMock.Setup(x => x.AddChunk(It.IsAny<int>(), It.IsAny<ChunkWriteInfo>()));
 
-            using (var chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
+            using (ChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
                 _gzipCompressMock.Object, _fileWriterTaskMock.Object))
             {
                 chunksQueue.EnqueueChunk(new ChunkReadInfo(It.IsAny<int>(), It.IsAny<long>(), It.IsAny<int>()));
@@ -90,7 +90,7 @@ namespace GZipTest.Tests
         [Test]
         public void QueueIsNotActiveIfNoChunks()
         {
-            using (var chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
+            using (ChunksQueue chunksQueue = new ChunksQueue(Environment.ProcessorCount, _fileReaderMock.Object,
                 _gzipCompressMock.Object, _fileWriterTaskMock.Object))
             {
                 Assert.IsFalse(chunksQueue.IsActive());

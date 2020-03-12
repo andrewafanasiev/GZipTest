@@ -18,10 +18,10 @@ namespace GZipTest.Tests
         [Test]
         public void TaskReturnsErrorIfWriterFails()
         {
-            var chunkWriterMock = new Mock<IChunkWriter>();
+            Mock<IChunkWriter> chunkWriterMock = new Mock<IChunkWriter>();
             chunkWriterMock.Setup(x => x.WriteToFile(It.IsAny<byte[]>())).Throws(new WriterException("An unexpected error occurred"));
 
-            using (var writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
+            using (FileWriterTask writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
             {
                 writerTask.AddChunk(0, new ChunkWriteInfo(0, It.IsAny<byte[]>()));
 
@@ -35,10 +35,10 @@ namespace GZipTest.Tests
         [Test]
         public void TaskReturnsErrorOnNullableChunkWriteInfo()
         {
-            var chunkWriterMock = new Mock<IChunkWriter>();
+            Mock<IChunkWriter> chunkWriterMock = new Mock<IChunkWriter>();
             chunkWriterMock.Setup(x => x.WriteToFile(It.IsAny<byte[]>()));
 
-            using (var writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
+            using (FileWriterTask writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
             {
                 writerTask.AddChunk(0, null);
 
@@ -51,7 +51,7 @@ namespace GZipTest.Tests
         [Test]
         public void WriterTaskIsActiveIfNotAllChunksAreProcessed()
         {
-            using (var writerTask = new FileWriterTask(ChunksCount, It.IsAny<IChunkWriter>()))
+            using (FileWriterTask writerTask = new FileWriterTask(ChunksCount, It.IsAny<IChunkWriter>()))
             {
                 writerTask.AddChunk(1, new ChunkWriteInfo(1, It.IsAny<byte[]>()));
 
@@ -64,10 +64,10 @@ namespace GZipTest.Tests
         [Test]
         public void SequentialChunkProcessing()
         {
-            var chunkWriterMock = new Mock<IChunkWriter>();
+            Mock<IChunkWriter> chunkWriterMock = new Mock<IChunkWriter>();
             chunkWriterMock.Setup(x => x.WriteToFile(It.IsAny<byte[]>()));
 
-            using (var writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
+            using (FileWriterTask writerTask = new FileWriterTask(ChunksCount, chunkWriterMock.Object))
             {
                 writerTask.AddChunk(2, new ChunkWriteInfo(2, It.IsAny<byte[]>()));
                 writerTask.AddChunk(1, new ChunkWriteInfo(1, It.IsAny<byte[]>()));

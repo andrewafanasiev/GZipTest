@@ -39,13 +39,13 @@ namespace GZipTest
         /// <returns>Operation result</returns>
         public bool Execute(string actionType, int workersCount, int chunkSize, out List<Exception> errors)
         {
-            var chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
+            ChunksInfo chunkInfos = _fileSplitterFactory.Create(actionType).GetChunks(_inFile, chunkSize);
 
-            using (var fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter))
-            using (var chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader,
+            using (IWriterTask fileWriterTask = _taskFactory.CreatWriterTask(chunkInfos.ChunksCount, _chunkWriter))
+            using (IChunksQueue chunksQueue = _taskFactory.CreateChunksQueue(workersCount, _sourceReader,
                 _compressorFactory.Create(actionType), fileWriterTask))
             {
-                foreach (var chunkInfo in chunkInfos.Chunks)
+                foreach (ChunkReadInfo chunkInfo in chunkInfos.Chunks)
                 {
                     chunksQueue.EnqueueChunk(new ChunkReadInfo(chunkInfo.Id, chunkInfo.Offset, chunkInfo.BytesCount));
                 }
